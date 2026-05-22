@@ -13,6 +13,7 @@ from typing import Any
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 DISPLAY_MAP_PATH = SKILL_ROOT / "references" / "exercise_type_display_map.json"
+REFERENCES_ROOT = SKILL_ROOT / "references"
 
 DOCUMENT_TYPES = {
     "worksheet",
@@ -64,6 +65,24 @@ def load_json(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError("Top-level JSON value must be an object.")
     return data
+
+
+def is_relative_to(path: Path, parent: Path) -> bool:
+    try:
+        path.resolve().relative_to(parent.resolve())
+    except ValueError:
+        return False
+    return True
+
+
+def validate_artifact_path(path: Path) -> list[str]:
+    resolved = path.resolve()
+    if is_relative_to(resolved, SKILL_ROOT) and not is_relative_to(resolved, REFERENCES_ROOT):
+        return [
+            "Generated plan files must not be stored under the skill directory. "
+            "Write plan.json/blueprint.md under outputs/<slug>/ instead."
+        ]
+    return []
 
 
 def load_display_map() -> dict[str, str]:
@@ -261,10 +280,11 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
+        errors = validate_artifact_path(args.input)
         if args.markdown:
-            errors = validate_markdown(args.input.read_text(encoding="utf-8"))
+            errors.extend(validate_markdown(args.input.read_text(encoding="utf-8")))
         else:
-            errors = validate(load_json(args.input))
+            errors.extend(validate(load_json(args.input)))
     except Exception as exc:  # noqa: BLE001 - CLI should report concise validation failures.
         errors = [str(exc)]
 

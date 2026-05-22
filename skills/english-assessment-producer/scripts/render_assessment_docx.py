@@ -20,6 +20,7 @@ from docx.shared import Mm, Pt, RGBColor
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
+REFERENCES_ROOT = SKILL_ROOT / "references"
 
 DEFAULT_FONT = "Times New Roman"
 DEFAULT_SIZE = Pt(12)
@@ -168,6 +169,20 @@ def build_document(template: Path | None = None) -> Document:
     doc = Document()
     apply_normal_style_typography(doc)
     return doc
+
+
+def is_relative_to(path: Path, parent: Path) -> bool:
+    try:
+        path.resolve().relative_to(parent.resolve())
+    except ValueError:
+        return False
+    return True
+
+
+def ensure_output_path_allowed(path: Path) -> None:
+    resolved = path.resolve()
+    if is_relative_to(resolved, SKILL_ROOT) and not is_relative_to(resolved, REFERENCES_ROOT):
+        raise ValueError("Generated DOCX files must be written under outputs/<slug>/, not under the skill directory.")
 
 
 def set_cell_text(cell, text: str, bold: bool = False, align: WD_ALIGN_PARAGRAPH | None = None) -> None:
@@ -907,6 +922,7 @@ def normalize_document(document: Document) -> None:
 
 
 def render(input_path: Path, output_path: Path, template: Path | None = None) -> None:
+    ensure_output_path_allowed(output_path)
     data = load_json(input_path)
     document = build_document(template)
     apply_page_setup(document, data)

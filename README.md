@@ -13,7 +13,7 @@ eng-test-gen/
 │   ├── english-assessment-planner/   # Lên kế hoạch nội dung, xác nhận với giáo viên
 │   └── english-assessment-producer/  # Sinh assessment.json → render DOCX
 ├── ref_data/               # Giáo án nguồn (GA TA 6–9) và file tham khảo
-└── outputs/               # Đầu ra: DOCX, JSON, audio
+└── outputs/               # Đầu ra: plan, DOCX, JSON, audio
 ```
 
 ## Cài đặt nhanh (Linux)
@@ -165,8 +165,13 @@ Dữ liệu nguồn: các file `.docx` giáo án trong `ref_data/GA TA 6` … `G
 
 ```
 outputs/<slug>/
+├── plan.json
+├── blueprint.md
 ├── assessment.json
 ├── <title>.docx
+├── audio_manifest.json
 └── audio/
     └── *.mp3
 ```
+
+Quy ước: `skills/` chỉ chứa skill, scripts và references. Không lưu plan, JSON sinh đề, DOCX hoặc audio trong `skills/`; mọi file được tạo phải nằm trong `outputs/<slug>/`.

@@ -30,6 +30,23 @@ Before showing the teacher-facing plan, build an internal plan JSON, validate it
 - For tests, always produce a matrix summary before generation, but clarify whether the matrix is teacher-only metadata or printed in the DOCX.
 - For worksheets, produce a lighter content frame with exercises, resource blocks, purpose, question types, and difficulty.
 - If the teacher requests multiple units, keep the same exercise structure you would use for one unit. Do not create one separate exercise per unit. Mix vocabulary, grammar, and topics from all requested units inside each planned exercise.
+- Treat the skill directory as read-only. Never create plan JSON, draft Markdown, DOCX, audio, or other generated artifacts under `skills/` or inside the installed skill folder. All generated files must go under `outputs/<slug>/` in the project/workspace.
+
+## Default File Layout
+
+When you need to persist planning artifacts, create a document-specific output folder and keep them next to the future assessment files:
+
+```text
+outputs/<slug>/
+├── plan.json
+├── blueprint.md
+├── assessment.json        # created later by producer
+├── <title>.docx           # created later by producer
+└── audio/
+    └── *.mp3
+```
+
+Use the skill folder only to read `SKILL.md`, `references/`, and `scripts/`.
 
 ## Planning Flow
 
@@ -46,11 +63,11 @@ Before showing the teacher-facing plan, build an internal plan JSON, validate it
    - duration, total score, answer key required, transcript/audio if listening is included.
    - numbering mode: reset per exercise or continuous question numbering across the whole test.
    - output versions: student copy only, teacher copy with answers, or both.
-6. Build an internal plan JSON using `references/plan_schema.json`.
+6. Build an internal plan JSON using `references/plan_schema.json` and save it as `outputs/<slug>/plan.json` when a file is needed.
 7. Validate it:
-   - `python3 <skill_dir>/scripts/validate_assessment_plan.py /path/to/plan.json`
+   - `python3 <skill_dir>/scripts/validate_assessment_plan.py outputs/<slug>/plan.json`
 8. If validation fails, fix the plan JSON and validate again before replying.
-9. Finalize a teacher-facing plan in the format below.
+9. Finalize a teacher-facing plan in the format below. If saving it, write `outputs/<slug>/blueprint.md`, not a file in `skills/`.
 
 ## Internal Plan JSON
 

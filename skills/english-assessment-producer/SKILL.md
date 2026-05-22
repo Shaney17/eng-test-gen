@@ -30,18 +30,22 @@ If none is present, stop production and route to `english-assessment-planner`. D
 - Always include an answer key at the end of the DOCX.
 - If the assessment includes listening, always include transcript; generate MP3 only after teacher confirmation.
 - For multi-unit worksheets/tests, preserve the approved exercise structure as normal skill/format sections. Do not create one separate exercise per unit; mix KB-derived vocabulary, grammar, and topics from all requested units inside each exercise.
+- Treat the skill directory as read-only. Never write generated `plan.json`, `blueprint.md`, `assessment.json`, DOCX, audio manifests, or MP3 files under `skills/` or inside the installed skill folder. All generated artifacts must live under `outputs/<slug>/`.
 
 ## Default File Layout
 
 ```text
 outputs/<slug>/
+├── plan.json              # from planner when persisted
+├── blueprint.md           # teacher-facing approved plan when persisted
 ├── assessment.json
 ├── <title>.docx
+├── audio_manifest.json    # only when listening audio is requested
 └── audio/
     └── *.mp3
 ```
 
-DOCX rendering always uses the built-in rules in `references/format_rules.md`. Do not require a `.docx` template file. Resolve script/reference paths relative to this skill folder.
+DOCX rendering always uses the built-in rules in `references/format_rules.md`. Do not require a `.docx` template file. Resolve script/reference paths relative to this skill folder, but write outputs only to `outputs/<slug>/`.
 
 Bundled files:
 
@@ -182,6 +186,8 @@ Rendering constraints:
 ## Production Flow
 
 1. Generate `assessment.json` from the confirmed blueprint and KB data.
+   - Save it as `outputs/<slug>/assessment.json`.
+   - If the approved `plan.json` or `blueprint.md` exists elsewhere, copy/move it into the same `outputs/<slug>/` folder before rendering.
 2. Run validation:
    - `python3 <skill_dir>/scripts/validate_assessment_json.py outputs/<slug>/assessment.json`
 3. Render DOCX:

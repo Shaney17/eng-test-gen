@@ -11,6 +11,9 @@ from pathlib import Path
 from typing import Any
 
 
+SKILL_ROOT = Path(__file__).resolve().parents[1]
+REFERENCES_ROOT = SKILL_ROOT / "references"
+
 QUESTION_TYPES_WITH_OPTIONS = {
     "pronunciation_odd_one",
     "stress_odd_one",
@@ -119,6 +122,24 @@ def load_json(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError("Top-level JSON value must be an object.")
     return data
+
+
+def is_relative_to(path: Path, parent: Path) -> bool:
+    try:
+        path.resolve().relative_to(parent.resolve())
+    except ValueError:
+        return False
+    return True
+
+
+def validate_artifact_path(path: Path) -> list[str]:
+    resolved = path.resolve()
+    if is_relative_to(resolved, SKILL_ROOT) and not is_relative_to(resolved, REFERENCES_ROOT):
+        return [
+            "Generated assessment files must not be stored under the skill directory. "
+            "Write assessment.json under outputs/<slug>/ instead."
+        ]
+    return []
 
 
 def as_number(value: Any, default: float = 0.0) -> float:
@@ -779,8 +800,9 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
+        errors = validate_artifact_path(args.input)
         data = load_json(args.input)
-        errors = validate(data)
+        errors.extend(validate(data))
     except Exception as exc:  # noqa: BLE001 - CLI should report concise validation failures.
         errors = [str(exc)]
 
