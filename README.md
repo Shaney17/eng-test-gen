@@ -31,12 +31,12 @@ bash /tmp/eng-test-gen/scripts/install_linux.sh
 ```
 
 Script sẽ tự động:
-1. Hỏi chọn agent cần cài skills (Codex / Claude Code / Hermes / All)
+1. Hỏi chọn agent cần cài skills ở lần cài đầu tiên; các lần chạy sau tự cập nhật lại các agent đã cài trước đó
 2. Tải source từ GitHub nếu chạy bằng `curl | bash`
-3. Tải `knowledge_base.db` từ GitHub nếu trong source local chưa có DB
-4. Copy app files vào `~/.local/share/english-assessment`
+3. Cập nhật `knowledge_base.db` theo bản mới nhất trong source/DB URL
+4. Copy/cập nhật app files vào `~/.local/share/english-assessment`
 5. Cài `python3-venv` trên Ubuntu/Debian nếu máy đang thiếu
-6. Tạo Python venv và cài `mcp`, `python-docx`, `requests`, `pyyaml`
+6. Tạo Python venv và cài `mcp`, `python-docx`, `requests`, `pyyaml`, `wordfreq`
 7. Cài skills và cấu hình MCP server cho agent đã chọn
 
 Mặc định DB được tải từ:
@@ -56,6 +56,9 @@ curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_lin
 
 # Non-interactive mode phải truyền rõ --agents
 curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash -s -- --yes --agents codex
+
+# Sau khi đã cài ít nhất một lần, lệnh này tự update đúng các agent đã cài trước đó
+curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash -s -- --yes
 
 # Cài từ branch/tag khác
 curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash -s -- --ref main
@@ -146,7 +149,7 @@ Dữ liệu nguồn: các file `.docx` giáo án trong `ref_data/GA TA 6` … `G
 | Nhóm | Dạng bài |
 |---|---|
 | Phonetics | `pronunciation_odd_one`, `stress_odd_one` |
-| Vocabulary | `vocab_mcq`, `word_bank_gap_fill`, `missing_letters`, `odd_one_topic`, `matching`, `word_form`, `crossword`, `label_picture` |
+| Vocabulary | `vocab_mcq`, `word_bank_gap_fill`, `missing_letters`, `odd_one_topic`, `matching`, `word_form`, `crossword` |
 | Grammar | `grammar_mcq`, `verb_form`, `grammar_gap_fill`, `choose_between_forms`, `error_correction` |
 | Writing | `sentence_rewrite`, `rewrite_with_given_word`, `sentence_combining`, `sentence_building`, `guided_paragraph` |
 | Reading | `reading_mcq`, `reading_gap_fill`, `reading_tf` |

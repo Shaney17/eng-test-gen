@@ -7,7 +7,6 @@
   "missing_letters": "Hoàn thành chữ cái còn thiếu",
   "word_form": "Cho dạng đúng của từ trong ngoặc",
   "odd_one_topic": "Chọn từ khác nhóm",
-  "label_picture": "Nhìn tranh và viết từ/cụm từ",
   "crossword": "Ô chữ theo gợi ý",
   "grammar_mcq": "MCQ ngữ pháp",
   "verb_form": "Chia dạng đúng của động từ",
@@ -40,6 +39,5 @@
   "guided_sentence_writing": "Viết câu hoàn chỉnh theo gợi ý",
   "guided_paragraph": "Viết đoạn văn ngắn theo gợi ý",
   "email_writing": "Viết email/tin nhắn theo yêu cầu",
-  "picture_prompt_writing": "Viết theo tranh/gợi ý hình ảnh",
   "word_form_writing": "Cho dạng đúng của từ trong phần viết"
 }

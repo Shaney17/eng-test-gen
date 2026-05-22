@@ -12,6 +12,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+try:
+    from wordfreq import zipf_frequency
+except ImportError:  # pragma: no cover - optional dependency in older installs.
+    zipf_frequency = None
+
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 REFERENCES_ROOT = SKILL_ROOT / "references"
@@ -41,7 +46,6 @@ SUPPORTED_EXERCISE_TYPES = {
     "missing_letters",
     "word_form",
     "odd_one_topic",
-    "label_picture",
     "crossword",
     "grammar_mcq",
     "verb_form",
@@ -74,7 +78,6 @@ SUPPORTED_EXERCISE_TYPES = {
     "guided_sentence_writing",
     "guided_paragraph",
     "email_writing",
-    "picture_prompt_writing",
     "word_form_writing",
 }
 FORBIDDEN_EXERCISE_TYPES = {
@@ -91,6 +94,8 @@ FORBIDDEN_EXERCISE_TYPES = {
     "ordering": "Use sentence_ordering or dialogue_ordering.",
     "writing": "Use sentence_building, sentence_rewrite, guided_sentence_writing, guided_paragraph, or email_writing.",
     "translation": "Translation is not in the approved format list.",
+    "label_picture": "Picture/image-based exercises are no longer supported. Use a text-only vocabulary format.",
+    "picture_prompt_writing": "Picture/image-based writing prompts are no longer supported. Use guided_paragraph, guided_sentence_writing, or email_writing.",
 }
 SUPPORTED_BLOCK_TYPES = {
     "heading",
@@ -114,6 +119,66 @@ UNDERLINE_PATTERN = re.compile(r"__([^_\s](?:.*?[^_\s])?)__")
 SPEAKER_LABEL_PATTERN = re.compile(r"(?<!\w)([A-ZÀ-Ỹ][A-Za-zÀ-ỹ' -]{0,24}):")
 UNIT_HEADING_PATTERN = re.compile(r"^\s*unit\s+\d+\b", re.IGNORECASE)
 ENGLISH_WORD_PATTERN = re.compile(r"^[A-Za-z][A-Za-z'-]*$")
+QUESTION_LEVEL_LISTENING_SCRIPT_KEYS = {
+    "transcript",
+    "dialogue",
+    "audio_text",
+    "listening_text",
+    "script",
+    "turns",
+}
+CONTENT_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "but",
+    "by",
+    "can",
+    "did",
+    "do",
+    "does",
+    "for",
+    "from",
+    "go",
+    "goes",
+    "has",
+    "have",
+    "he",
+    "her",
+    "his",
+    "i",
+    "in",
+    "is",
+    "it",
+    "its",
+    "last",
+    "like",
+    "likes",
+    "my",
+    "of",
+    "on",
+    "or",
+    "she",
+    "the",
+    "their",
+    "they",
+    "to",
+    "was",
+    "we",
+    "what",
+    "when",
+    "where",
+    "who",
+    "why",
+    "will",
+    "with",
+    "you",
+    "your",
+}
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -191,6 +256,13 @@ def load_kb_vocab_words(db_path: Path | None) -> set[str] | None:
     for (word,) in rows:
         words.update(vocab_tokens(str(word or "")))
     return words
+
+
+def looks_like_real_english_word(word: str) -> bool | None:
+    if zipf_frequency is None:
+        return None
+    # A low threshold keeps valid but less common school vocabulary while rejecting nonce words.
+    return zipf_frequency(word.lower(), "en") >= 1.0
 
 
 def as_number(value: Any, default: float = 0.0) -> float:
@@ -534,13 +606,12 @@ def allowed_phonetics_words(data: dict[str, Any]) -> set[str]:
     return allowed
 
 
-def validate_phonetics_vocab(
+def validate_phonetics_words(
     data: dict[str, Any],
     kb_vocab_words: set[str] | None,
     errors: list[str],
 ) -> None:
-    if kb_vocab_words is None:
-        return
+    known_words = kb_vocab_words or set()
     allowed_words = allowed_phonetics_words(data)
     for item in iter_questions(data):
         container = item["container"]
@@ -555,13 +626,16 @@ def validate_phonetics_vocab(
             if not ENGLISH_WORD_PATTERN.fullmatch(word):
                 errors.append(
                     f"Question {question_id} phonetics option '{word}' is not a plain English word. "
-                    "Use only alphabetic English words from the KB."
+                    "Use only alphabetic English words."
                 )
                 continue
-            if word not in kb_vocab_words and word not in allowed_words:
+            if word in known_words or word in allowed_words:
+                continue
+            english_check = looks_like_real_english_word(word)
+            if english_check is False:
                 errors.append(
-                    f"Question {question_id} phonetics option '{word}' is not found in knowledge_base.db. "
-                    "Use KB vocabulary, or add a teacher-approved exception in metadata.allowed_phonetics_words."
+                    f"Question {question_id} phonetics option '{word}' does not look like a real English word. "
+                    "Use real English words, or add a teacher-approved exception in metadata.allowed_phonetics_words."
                 )
 
 
@@ -615,6 +689,42 @@ def looks_like_dialogue_transcript(text: str) -> bool:
     return len(labels) >= 2
 
 
+def normalize_for_content_match(text: str) -> str:
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9']+", " ", str(text or "").lower())).strip()
+
+
+def content_tokens(text: str) -> set[str]:
+    return {
+        token
+        for token in re.findall(r"[a-z][a-z']{2,}", str(text or "").lower())
+        if token not in CONTENT_STOPWORDS
+    }
+
+
+def normalized_answer_text(answer: Any, options: Any) -> str:
+    answer_text = normalize_answer(answer)
+    if isinstance(options, list) and re.fullmatch(r"[a-d]", answer_text, flags=re.IGNORECASE):
+        index = ord(answer_text.lower()) - ord("a")
+        if 0 <= index < len(options):
+            return normalized_option_text(options[index], index)
+    return str(answer or "")
+
+
+def text_supported_by_transcript(text: str, transcript: str) -> bool:
+    normalized_text = normalize_for_content_match(text)
+    normalized_transcript = normalize_for_content_match(transcript)
+    if not normalized_text:
+        return False
+    if normalized_text in normalized_transcript:
+        return True
+    tokens = content_tokens(normalized_text)
+    if not tokens:
+        return False
+    transcript_tokens = content_tokens(normalized_transcript)
+    overlap = len(tokens & transcript_tokens)
+    return overlap >= min(2, len(tokens))
+
+
 def validate_multi_unit_structure(data: dict[str, Any], errors: list[str]) -> None:
     metadata = data.get("metadata") if isinstance(data.get("metadata"), dict) else {}
     units = metadata.get("units")
@@ -650,9 +760,18 @@ def validate_listening_transcript(data: dict[str, Any], errors: list[str]) -> No
                 "Do not place the listening transcript in the student copy."
             )
         for question_index, question in enumerate(block.get("questions") or [], start=1):
-            if isinstance(question, dict) and question.get("passage"):
+            if not isinstance(question, dict):
+                continue
+            question_label = question.get("id") or f"{block_label}.{question_index}"
+            if question.get("passage"):
                 errors.append(
-                    f"Listening question {question.get('id') or str(block_label) + '.' + str(question_index)} must not contain passage/transcript text."
+                    f"Listening question {question_label} must not contain passage/transcript text."
+                )
+            present_script_keys = sorted(key for key in QUESTION_LEVEL_LISTENING_SCRIPT_KEYS if question.get(key))
+            if present_script_keys:
+                errors.append(
+                    f"Listening question {question_label} contains question-level listening script fields: {', '.join(present_script_keys)}. "
+                    "Use one shared top-level listening.transcript for the whole listening exercise."
                 )
 
     has_listening_questions = bool(listening_question_groups) or any(
@@ -672,6 +791,38 @@ def validate_listening_transcript(data: dict[str, Any], errors: list[str]) -> No
         transcript = str(listening.get("transcript") or "")
         if looks_like_dialogue_transcript(transcript) and transcript_has_wrapped_dialogue(transcript):
             errors.append("Dialogue transcript is not line-broken by speaker turn.")
+
+
+def validate_listening_question_grounding(data: dict[str, Any], errors: list[str]) -> None:
+    listening = data.get("listening")
+    if not isinstance(listening, dict) or not listening.get("transcript"):
+        return
+    transcript = str(listening.get("transcript") or "")
+    for item in iter_questions(data):
+        container = item["container"]
+        question = item["question"]
+        q_type = question.get("exercise_type", container.get("exercise_type"))
+        if not is_listening_type(q_type):
+            continue
+        question_id = question_id_for(item) or f"{item['container_id']}.{item['question_index']}"
+        stem = str(question.get("stem") or question.get("prompt") or "")
+        if q_type == "listening_mcq":
+            answer_text = normalized_answer_text(question.get("answer"), question.get("options"))
+            if not text_supported_by_transcript(answer_text, transcript):
+                errors.append(
+                    f"Listening question {question_id} correct answer '{answer_text}' is not supported by listening.transcript."
+                )
+        elif q_type == "listening_gap_fill":
+            answer_text = str(question.get("answer") or "")
+            if not text_supported_by_transcript(answer_text, transcript):
+                errors.append(
+                    f"Listening gap-fill question {question_id} answer '{answer_text}' is not found or supported in listening.transcript."
+                )
+        elif q_type == "listening_tf":
+            if stem and not text_supported_by_transcript(stem, transcript):
+                errors.append(
+                    f"Listening T/F question {question_id} does not appear to be grounded in listening.transcript."
+                )
 
 
 def validate_matrix(data: dict[str, Any], errors: list[str], total_questions: int) -> None:
@@ -873,7 +1024,8 @@ def validate(data: dict[str, Any], kb_vocab_words: set[str] | None = None) -> li
     validate_sections(data, errors)
     validate_multi_unit_structure(data, errors)
     validate_listening_transcript(data, errors)
-    validate_phonetics_vocab(data, kb_vocab_words, errors)
+    validate_listening_question_grounding(data, errors)
+    validate_phonetics_words(data, kb_vocab_words, errors)
 
     total_questions, calculated_points = validate_questions(data, errors)
     validate_matrix(data, errors, total_questions)
@@ -899,8 +1051,9 @@ def validate(data: dict[str, Any], kb_vocab_words: set[str] | None = None) -> li
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", type=Path, help="Path to assessment.json")
-    parser.add_argument("--kb-db", type=Path, default=None, help="Optional knowledge_base.db path for strict phonetics word validation")
-    parser.add_argument("--skip-kb-vocab-check", action="store_true", help="Skip KB-backed phonetics/stress option validation")
+    parser.add_argument("--kb-db", type=Path, default=None, help="Optional knowledge_base.db path for known school vocabulary")
+    parser.add_argument("--skip-english-word-check", action="store_true", help="Skip phonetics/stress English-word validation")
+    parser.add_argument("--skip-kb-vocab-check", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--json", action="store_true", help="Print machine-readable validation result")
     args = parser.parse_args()
 
@@ -908,7 +1061,11 @@ def main() -> int:
         errors = validate_artifact_path(args.input)
         data = load_json(args.input)
         kb_vocab_words = None
-        if not args.skip_kb_vocab_check and not is_relative_to(args.input, REFERENCES_ROOT):
+        if (
+            not args.skip_english_word_check
+            and not args.skip_kb_vocab_check
+            and not is_relative_to(args.input, REFERENCES_ROOT)
+        ):
             kb_vocab_words = load_kb_vocab_words(args.kb_db or default_kb_db_path())
         errors.extend(validate(data, kb_vocab_words=kb_vocab_words))
     except Exception as exc:  # noqa: BLE001 - CLI should report concise validation failures.

@@ -20,6 +20,7 @@ Forbidden labels:
 - `meaning_matching`, `meaning matching`: not allowed. Use English-context `vocab_mcq` instead.
 - `true_false`: use `reading_tf` or `listening_tf`.
 - `fill_blank`: use `word_bank_gap_fill`, `grammar_gap_fill`, `reading_gap_fill`, or `listening_gap_fill`.
+- `label_picture`, `picture_prompt_writing`, `picture_prompt`: not allowed. Use text-only vocabulary or writing formats.
 
 Teacher-facing restriction:
 
@@ -38,7 +39,6 @@ word_bank_gap_fill
 missing_letters
 word_form
 odd_one_topic
-label_picture
 crossword
 grammar_mcq
 verb_form
@@ -71,7 +71,6 @@ listening_matching
 guided_sentence_writing
 guided_paragraph
 email_writing
-picture_prompt_writing
 word_form_writing
 ```
 
@@ -87,7 +86,6 @@ word_form_writing
 | `missing_letters` | Hoàn thành chữ cái còn thiếu |
 | `word_form` | Cho dạng đúng của từ trong ngoặc |
 | `odd_one_topic` | Chọn từ khác nhóm |
-| `label_picture` | Nhìn tranh và viết từ/cụm từ |
 | `crossword` | Ô chữ theo gợi ý |
 | `grammar_mcq` | MCQ ngữ pháp |
 | `verb_form` | Chia dạng đúng của động từ |
@@ -120,7 +118,6 @@ word_form_writing
 | `guided_sentence_writing` | Viết câu hoàn chỉnh theo gợi ý |
 | `guided_paragraph` | Viết đoạn văn ngắn theo gợi ý |
 | `email_writing` | Viết email/tin nhắn theo yêu cầu |
-| `picture_prompt_writing` | Viết theo tranh/gợi ý hình ảnh |
 | `word_form_writing` | Cho dạng đúng của từ trong phần viết |
 
 ## Pronunciation / Phonetics
@@ -134,7 +131,7 @@ Question 1. A. c<u>i</u>ty    B. b<u>i</u>cycle    C. r<u>i</u>ce    D. v<u>i</u
 
 Answer: one option letter.
 
-Internal generation note: mark underlined sounds as `__i__` inside each option. Do not put the section instruction or target sound (`ee`, `ch`, `/i:/`, etc.) in each question. Each item should show only the number and options. Each option must be one real English word from the KB vocabulary only, not a phrase; use `dance`, not `folk dance`, and never invent pseudo-words. The underlined letters must be identical across all options, for example all four options underline `ch`.
+Internal generation note: mark underlined sounds as `__i__` inside each option. Do not put the section instruction or target sound (`ee`, `ch`, `/i:/`, etc.) in each question. Each item should show only the number and options. Each option must be one real English word, not a phrase; use `dance`, not `folk dance`, and never invent pseudo-words. KB vocabulary is preferred but not required. The underlined letters must be identical across all options, for example all four options underline `ch`.
 
 ### `stress_odd_one`
 Instruction: `Choose the word that has a different stress pattern from the others.`
@@ -145,7 +142,7 @@ Question 1. A. historic    B. exciting    C. expensive    D. beautiful
 
 Answer: one option letter.
 
-Do not underline letters in stress questions. Each option must be one real English word from the KB vocabulary only, not a phrase or invented pseudo-word.
+Do not underline letters in stress questions. Each option must be one real English word, not a phrase or invented pseudo-word. KB vocabulary is preferred but not required.
 
 ## Vocabulary
 
@@ -201,14 +198,6 @@ Planning note: use one shared instruction for the whole exercise. Do not plan or
 
 ```text
 Question 1. A. train    B. bus    C. plane    D. kitchen
-```
-
-### `label_picture`
-Instruction: `Look at the pictures and write the correct words.`
-
-```text
-Picture 1: __________
-Picture 2: __________
 ```
 
 ### `crossword`
@@ -479,7 +468,7 @@ Speaker 2: ________
 A. playing football    B. reading books
 ```
 
-Listening formats require `listening.transcript`; MP3 is optional until confirmed. The transcript belongs in the answer key/transcript section only, not in the student question area. Dialogue transcripts must have one speaker turn per line.
+Listening formats require `listening.transcript`; MP3 is optional until confirmed. The transcript belongs in the answer key/transcript section only, not in the student question area. Each listening exercise has one shared listening text/audio source for all questions; do not plan a separate dialogue or transcript per question. Every question must be answerable from the shared transcript, and the correct answer must be explicitly stated or directly supported. Dialogue transcripts must have one speaker turn per line.
 
 ## Writing
 
@@ -527,13 +516,6 @@ Instruction: `Write an email/message using the cues.`
 ```text
 Write an email of 60-80 words to invite your friend to your birthday party.
 Include: time, place, activities.
-```
-
-### `picture_prompt_writing`
-Instruction: `Look at the picture(s) and write sentences/a paragraph.`
-
-```text
-Look at the pictures of Tet activities. Write 5 sentences about what people are doing.
 ```
 
 ### `word_form_writing`

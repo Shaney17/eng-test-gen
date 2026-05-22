@@ -221,6 +221,7 @@ When planning, specify these constraints in natural language where relevant:
 - For longer tests, include skill balance when requested: vocabulary/grammar plus reading and/or listening/writing.
 - If listening is included, require transcript in the producer output and mark audio as optional until teacher confirms.
 - Listening transcripts belong in the answer key/transcript section only, not in the student question area.
+- A listening exercise should use one shared listening text/audio source for all questions in that exercise. Do not plan a separate dialogue or transcript per listening question.
 - For exam papers, use continuous `Question 1...N` numbering unless the teacher explicitly asks otherwise.
 - For worksheets, reset numbering inside each exercise unless the teacher asks for continuous numbering.
 - For exam papers, default to not printing the matrix in the student DOCX; keep it in JSON for teacher review.

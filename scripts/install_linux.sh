@@ -20,13 +20,14 @@ Options:
   --agents LIST            Comma-separated agents: codex,claude,hermes,all
   --ref REF                Git ref to download when running from curl. Default: main
   --db-url URL             Download knowledge_base.db from this URL.
-  --yes                    Non-interactive mode. Requires --agents.
+  --yes                    Non-interactive mode. Requires --agents unless existing installed agents are detected.
   --skip-mcp-config        Copy app/skills but do not update agent MCP config.
   -h, --help               Show help.
 
 Examples:
   scripts/install_linux.sh
   scripts/install_linux.sh --agents codex,claude
+  scripts/install_linux.sh --yes
   scripts/install_linux.sh --yes --agents all
   curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash
 
@@ -107,6 +108,7 @@ INSTALL_DIR="${INSTALL_DIR/#\~/${HOME}}"
 if [[ -z "${DB_URL}" ]]; then
   DB_URL="https://raw.githubusercontent.com/${GITHUB_REPO}/${REF}/knowledge_base.db"
 fi
+INSTALL_MANIFEST="${INSTALL_DIR}/install_state.env"
 
 require_file() {
   [[ -f "$1" ]] || die "Missing required file: $1"
@@ -174,18 +176,22 @@ prepare_source_repo() {
 install_database() {
   local dst="${INSTALL_DIR}/knowledge_base.db"
   if [[ -f "${REPO_DIR}/knowledge_base.db" ]]; then
+    log "Updating knowledge_base.db from source"
     cp "${REPO_DIR}/knowledge_base.db" "$dst"
     return
   fi
 
-  if [[ -f "$dst" ]]; then
-    log "Using existing database: ${dst}"
-    return
-  fi
-
   log "Downloading knowledge_base.db"
-  if ! download_file "$DB_URL" "$dst"; then
-    rm -f "$dst"
+  local tmp_db
+  tmp_db="$(mktemp)"
+  if download_file "$DB_URL" "$tmp_db"; then
+    mv "$tmp_db" "$dst"
+  else
+    rm -f "$tmp_db"
+    if [[ -f "$dst" ]]; then
+      log "Could not download latest knowledge_base.db; keeping existing database: ${dst}"
+      return
+    fi
     die "Could not download knowledge_base.db from ${DB_URL}. Provide --db-url or set ENG_TEST_GEN_DB_URL."
   fi
 }
@@ -209,16 +215,46 @@ normalize_agents() {
   printf '%s ' "${out[@]}"
 }
 
+detect_installed_agents() {
+  local agents=()
+  if [[ -f "${INSTALL_MANIFEST}" ]]; then
+    local line saved
+    line="$(grep -E '^AGENTS=' "${INSTALL_MANIFEST}" 2>/dev/null | tail -n 1 || true)"
+    saved="${line#AGENTS=}"
+    saved="${saved//\"/}"
+    saved="${saved//\'/}"
+    saved="$(printf '%s' "$saved" | tr ' ' ',' | sed -E 's/,+/,/g; s/^,//; s/,$//')"
+    if [[ -n "${saved}" && "${saved}" != "${line}" ]]; then
+      normalize_agents "${saved}"
+      return
+    fi
+  fi
+
+  [[ -d "${HOME}/.codex/skills/english-assessment-planner" || -d "${HOME}/.codex/skills/english-assessment-producer" ]] && agents+=("codex")
+  [[ -d "${HOME}/.claude/skills/english-assessment-planner" || -d "${HOME}/.claude/skills/english-assessment-producer" ]] && agents+=("claude")
+  [[ -d "${HOME}/.hermes/skills/english-assessment-planner" || -d "${HOME}/.hermes/skills/english-assessment-producer" ]] && agents+=("hermes")
+  if [[ "${#agents[@]}" -gt 0 ]]; then
+    printf '%s ' "${agents[@]}"
+  fi
+}
+
 prompt_agents() {
   if [[ -n "${AGENTS}" ]]; then
     normalize_agents "${AGENTS}"
     return
   fi
+  local installed_agents
+  installed_agents="$(detect_installed_agents)"
+  if [[ -n "${installed_agents}" ]]; then
+    printf '[install] Updating previously installed agents: %s\n' "${installed_agents}" >&2
+    printf '%s' "${installed_agents}"
+    return
+  fi
   if [[ "${ASSUME_YES}" -eq 1 ]]; then
-    die "--yes requires --agents. Example: --yes --agents codex"
+    die "--yes requires --agents on first install. Example: --yes --agents codex"
   fi
   [[ -r /dev/tty ]] || die "No interactive terminal available. Re-run with --agents codex, claude, hermes, or all."
-  cat <<'EOF'
+  cat > /dev/tty <<'EOF'
 Choose AI agents to install skills for:
   1) Codex        (~/.codex/skills)
   2) Claude Code  (~/.claude/skills)
@@ -351,7 +387,7 @@ install_python_env() {
   rm -rf "${INSTALL_DIR}/.venv"
   python3 -m venv "${INSTALL_DIR}/.venv"
   "${INSTALL_DIR}/.venv/bin/python" -m pip install --upgrade pip
-  "${INSTALL_DIR}/.venv/bin/python" -m pip install mcp python-docx requests pyyaml
+  "${INSTALL_DIR}/.venv/bin/python" -m pip install mcp python-docx requests pyyaml wordfreq
 }
 
 install_skills_for_agent() {
@@ -501,6 +537,19 @@ install_mcp_for_agent() {
   esac
 }
 
+write_install_manifest() {
+  local selected_agents="$1"
+  local agents_csv
+  agents_csv="$(printf '%s' "${selected_agents}" | tr ' ' ',' | sed -E 's/,+/,/g; s/^,//; s/,$//')"
+  mkdir -p "${INSTALL_DIR}"
+  cat > "${INSTALL_MANIFEST}" <<EOF
+APP_NAME="${APP_NAME}"
+REF="${REF}"
+AGENTS="${agents_csv}"
+SKIP_MCP_CONFIG="${SKIP_MCP_CONFIG}"
+EOF
+}
+
 verify_install() {
   log "Verifying MCP server can start"
   ENGLISH_KB_DB_PATH="$(mcp_db)" timeout 3 "$(mcp_python)" "$(mcp_server)" >/tmp/english-kb-mcp-verify.log 2>&1 || true
@@ -522,6 +571,7 @@ main() {
     install_skills_for_agent "$agent"
     install_mcp_for_agent "$agent"
   done
+  write_install_manifest "${selected_agents}"
 
   verify_install
 

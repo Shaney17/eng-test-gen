@@ -8,6 +8,7 @@ Forbidden labels and replacements:
 - `meaning_matching`, `meaning matching` -> not allowed. Use English-context `vocab_mcq` instead.
 - `true_false` -> use `reading_tf` or `listening_tf`.
 - `fill_blank` -> use `word_bank_gap_fill`, `grammar_gap_fill`, `reading_gap_fill`, or `listening_gap_fill`.
+- `label_picture`, `picture_prompt_writing`, `picture_prompt` -> not allowed. Use text-only vocabulary or writing formats.
 
 Do not use "Yes/No" as `exercise_type` or as the visible exercise format label. It is allowed as grammar content/focus when it came from the planner or KB. Keep `exercise_type` as `grammar_mcq` or `question_making`.
 
@@ -22,7 +23,6 @@ word_bank_gap_fill
 missing_letters
 word_form
 odd_one_topic
-label_picture
 crossword
 grammar_mcq
 verb_form
@@ -55,7 +55,6 @@ listening_matching
 guided_sentence_writing
 guided_paragraph
 email_writing
-picture_prompt_writing
 word_form_writing
 ```
 
@@ -64,7 +63,7 @@ word_form_writing
 ### `pronunciation_odd_one`
 Instruction: `Choose the word whose underlined part is pronounced differently from the others.`
 
-Mark the pronounced part with `__underlined text__`; the renderer converts it to Word underline. Use one shared `question_group.instructions` value and do not repeat the instruction inside each question stem. Each question should omit `stem`/`prompt`; do not put the target sound (`ee`, `ch`, `/i:/`, etc.) before the options. Each option must be one real English word from the KB vocabulary only, not a phrase; use `dance`, not `folk dance`, and never invent pseudo-words. The underlined letters must be identical across all options, for example all four options underline `ch`.
+Mark the pronounced part with `__underlined text__`; the renderer converts it to Word underline. Use one shared `question_group.instructions` value and do not repeat the instruction inside each question stem. Each question should omit `stem`/`prompt`; do not put the target sound (`ee`, `ch`, `/i:/`, etc.) before the options. Each option must be one real English word, not a phrase; use `dance`, not `folk dance`, and never invent pseudo-words. KB vocabulary is preferred but not required. The underlined letters must be identical across all options, for example all four options underline `ch`.
 
 ```json
 {
@@ -84,7 +83,7 @@ Mark the pronounced part with `__underlined text__`; the renderer converts it to
 ### `stress_odd_one`
 Instruction: `Choose the word that has a different stress pattern from the others.`
 
-Do not underline any letters in stress questions. Each option must be one real English word from the KB vocabulary only, not a phrase or invented pseudo-word.
+Do not underline any letters in stress questions. Each option must be one real English word, not a phrase or invented pseudo-word. KB vocabulary is preferred but not required.
 
 ```json
 {"id": "Q1", "options": ["historic", "exciting", "expensive", "beautiful"], "answer": "D"}
@@ -157,14 +156,6 @@ Use one shared `question_group.instructions` value: `Choose the odd one out.` Ea
 
 ```json
 {"id": "Q1", "options": ["train", "bus", "plane", "kitchen"], "answer": "D"}
-```
-
-### `label_picture`
-Use a `picture_prompt` block when image support is available; otherwise use textual picture labels.
-
-```text
-Picture 1: __________
-Picture 2: __________
 ```
 
 ### `crossword`
@@ -348,7 +339,7 @@ Use a `notice_box` block before the question group.
 
 ## Listening
 
-Listening tasks require top-level `listening.transcript`. MP3 generation remains optional until confirmed. Do not put the transcript in the student question area as a passage/text block or question passage. Dialogue transcripts must have one speaker turn per line.
+Listening tasks require top-level `listening.transcript`. MP3 generation remains optional until confirmed. Do not put the transcript in the student question area as a passage/text block or question passage. Each listening exercise has one shared listening text/audio source; do not create a separate dialogue or mini-transcript for each question. Every question must be answerable from the shared transcript, and the correct answer must be explicitly stated or directly supported. Dialogue transcripts must have one speaker turn per line.
 
 ### `listening_mcq`
 ```json
@@ -414,9 +405,6 @@ Mai  | ________ | 7:00
   "lines": 8
 }
 ```
-
-### `picture_prompt_writing`
-Use `picture_prompt` when image support is available; otherwise describe the picture in text.
 
 ### `word_form_writing`
 ```json

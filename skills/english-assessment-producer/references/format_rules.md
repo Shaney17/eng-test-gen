@@ -265,7 +265,7 @@ Use stacked options when options are sentence-length.
 
 ### Images
 
-- The exam sample contains one drawing/image. If using sign/image prompts, keep them inline with the question group and avoid oversized images.
+- Do not use picture/image/drawing prompt formats. Keep exercises text-only.
 
 ## Bold Rules
 
