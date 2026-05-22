@@ -16,6 +16,31 @@ eng-test-gen/
 └── outputs/               # Đầu ra: DOCX, JSON, audio
 ```
 
+## Cài đặt nhanh (Linux)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --agents all
+```
+
+Script sẽ tự động:
+1. Tạo Python venv và cài `mcp`, `python-docx`, `requests`, `pyyaml`
+2. Copy app files vào `~/.local/share/english-assessment`
+3. Cài skills cho agent (Codex / Claude Code / Hermes)
+4. Cấu hình MCP server trong config của agent
+
+Các tùy chọn khác:
+
+```bash
+# Chỉ cài cho Claude Code
+curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --agents claude
+
+# Cài không cần xác nhận, thư mục tùy chỉnh
+curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --install-dir /path/to/dir --agents all
+
+# Bỏ qua bước cấu hình MCP (chỉ copy file)
+curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --skip-mcp-config --agents all
+```
+
 ## Kiến trúc hai bước
 
 | Bước | Skill | Đầu vào | Đầu ra |
