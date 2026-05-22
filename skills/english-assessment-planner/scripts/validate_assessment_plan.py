@@ -52,6 +52,7 @@ TECHNICAL_OUTPUT_PATTERNS = [
     "knowledge_type",
     "block_type",
 ]
+UNIT_SECTION_PATTERN = re.compile(r"^\s*unit\s+\d+\b", re.IGNORECASE)
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -201,6 +202,21 @@ def validate_sections(data: dict[str, Any], display_map: dict[str, str], errors:
             errors.append(f"Section {label} pronunciation_odd_one should mention underlined same letters/sounds.")
 
 
+def validate_multi_unit_plan(data: dict[str, Any], errors: list[str]) -> None:
+    units = data.get("units")
+    if not isinstance(units, list) or len(units) <= 1:
+        return
+    for idx, section in enumerate(data.get("sections") or [], start=1):
+        if not isinstance(section, dict):
+            continue
+        label_text = " ".join(str(section.get(key) or "") for key in ["section", "focus", "layout_notes"])
+        if UNIT_SECTION_PATTERN.search(label_text):
+            errors.append(
+                f"Section {section.get('section') or idx} is organized by unit. "
+                "For multi-unit requests, keep normal exercise sections and mix content from all units inside each exercise."
+            )
+
+
 def validate_content(data: dict[str, Any], errors: list[str]) -> None:
     content_sources = data.get("content_sources")
     if not isinstance(content_sources, dict):
@@ -232,6 +248,7 @@ def validate(data: dict[str, Any]) -> list[str]:
     validate_required(data, errors)
     validate_top_level(data, errors)
     validate_sections(data, display_map, errors)
+    validate_multi_unit_plan(data, errors)
     validate_content(data, errors)
     return errors
 

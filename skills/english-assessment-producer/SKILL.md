@@ -29,6 +29,7 @@ If none is present, stop production and route to `english-assessment-planner`. D
 - When revising, update only the requested block/group/question in JSON, then validate and render again.
 - Always include an answer key at the end of the DOCX.
 - If the assessment includes listening, always include transcript; generate MP3 only after teacher confirmation.
+- For multi-unit worksheets/tests, preserve the approved exercise structure as normal skill/format sections. Do not create one separate exercise per unit; mix KB-derived vocabulary, grammar, and topics from all requested units inside each exercise.
 
 ## Default File Layout
 
@@ -168,10 +169,14 @@ Rendering constraints:
 - For `reading_gap_fill`, do not create a `word_bank`; render each blank item as the question number plus A/B/C/D options on the same line.
 - `sentence_rewrite` and `rewrite_with_given_word` must include a student answer prompt, usually with the first 1-2 words of the rewritten sentence.
 - `rewrite_with_given_word` must include `given_word`/`cue_word` or the cue word in parentheses.
+- `word_bank_gap_fill` must use a separate `word_bank` block immediately before its `question_group`; do not place the word bank after questions or far away from the exercise heading.
 - Use `__underlined text__` markup for underlined sounds/phrases in `pronunciation_odd_one` options and `question_making` stems.
 - Do not use underline markup in `stress_odd_one`; stress questions compare word stress, not underlined sounds.
 - `pronunciation_odd_one` and `stress_odd_one` options must be single words only, not phrases.
 - In `pronunciation_odd_one`, the underlined letters must be identical across all options, such as `scholar`, `aching`, `chemist`, `approach` all underlining `ch`.
+- `pronunciation_odd_one`, `stress_odd_one`, and `odd_one_topic` must have one shared instruction in the `question_group`; individual questions should contain only options and answer. Do not put target sounds such as `ee` or repeated prompts like `Choose the odd one out` in each question stem.
+- Listening question groups must not include the transcript as a `passage`, `text`, question `passage`, or visible stem/prompt. Put the full transcript only in top-level `listening.transcript`; the renderer prints it after the answer key.
+- Dialogue transcripts must be line-broken by turn: `Mai: ...\nNam: ...`, not `Mai: ... Nam: ...` in one paragraph.
 - `question_making` must leave a blank answer line for students; set `lines` to at least `1` when generating JSON.
 
 ## Production Flow

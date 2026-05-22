@@ -24,6 +24,7 @@ SKILL_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_FONT = "Times New Roman"
 DEFAULT_SIZE = Pt(12)
 UNDERLINE_PATTERN = re.compile(r"__([^_\s](?:.*?[^_\s])?)__")
+SPEAKER_TURN_SPLIT_PATTERN = re.compile(r"(?=\s*[A-ZÀ-Ỹ][A-Za-zÀ-ỹ' -]{0,24}:)")
 LEADING_QUESTION_LABEL_PATTERN = re.compile(
     r"^\s*(?:question|câu)\s*\d+\s*[\.:)]\s*|^\s*[A-Za-z]?\d+\s*[\.:)]\s*",
     re.IGNORECASE,
@@ -691,7 +692,7 @@ def write_question(document: Document, state: RenderState, container_id: str, qu
     if points is not None:
         suffix += f" ({points} point{'s' if points != 1 else ''})"
     layout = question.get("option_layout") or group.get("option_layout") or state.option_layout
-    if not stem and not suffix and question.get("options") and q_type in {"pronunciation_odd_one", "stress_odd_one"}:
+    if not stem and not suffix and question.get("options") and q_type in {"pronunciation_odd_one", "stress_odd_one", "odd_one_topic"}:
         write_labeled_options(document, state, label, question.get("options"), allow_markup=q_type != "stress_odd_one")
         return
     if q_type == "reading_gap_fill" and question.get("options"):
@@ -824,13 +825,13 @@ def collect_answers(data: dict[str, Any]) -> list[tuple[str, str]]:
     return collect_answers_from_questions(data)
 
 
-def write_answer_key(document: Document, data: dict[str, Any]) -> None:
+def write_answer_key(document: Document, data: dict[str, Any]) -> bool:
     rendering = data.get("rendering") if isinstance(data.get("rendering"), dict) else {}
     if rendering.get("include_answer_key") is False:
-        return
+        return False
     answers = collect_answers(data)
     if not answers:
-        return
+        return False
     document.add_page_break()
     add_heading(document, "Answer Key", level=1)
     for question_id, answer in answers:
@@ -840,20 +841,38 @@ def write_answer_key(document: Document, data: dict[str, Any]) -> None:
             run.font.name = DEFAULT_FONT
             run.font.size = DEFAULT_SIZE
             run.font.color.rgb = RGBColor(0, 0, 0)
+    return True
 
 
-def write_transcript(document: Document, data: dict[str, Any]) -> None:
+def transcript_lines(transcript: str) -> list[str]:
+    lines: list[str] = []
+    for raw_line in transcript.strip().splitlines():
+        line = raw_line.strip()
+        if not line:
+            lines.append("")
+            continue
+        parts = SPEAKER_TURN_SPLIT_PATTERN.split(line)
+        split_parts = [part.strip() for part in parts if part.strip()]
+        lines.extend(split_parts or [line])
+    return lines
+
+
+def write_transcript(document: Document, data: dict[str, Any], answer_key_written: bool = False) -> None:
     rendering = data.get("rendering") if isinstance(data.get("rendering"), dict) else {}
     if rendering.get("include_transcript") is False:
         return
     listening = data.get("listening")
     if not isinstance(listening, dict) or not listening.get("transcript"):
         return
+    if not answer_key_written:
+        document.add_page_break()
     add_heading(document, "Listening Transcript", level=1)
     transcript = safe_text(listening.get("transcript"))
-    for block in re.split(r"\n\s*\n", transcript.strip()):
-        if block:
-            add_paragraph(document, block)
+    for line in transcript_lines(transcript):
+        if line:
+            add_paragraph(document, line)
+        else:
+            add_paragraph(document, "")
 
 
 def normalize_paragraph(paragraph) -> None:
@@ -912,8 +931,8 @@ def render(input_path: Path, output_path: Path, template: Path | None = None) ->
     else:
         write_sections_as_blocks(document, data.get("sections") if isinstance(data.get("sections"), list) else [], state)
 
-    write_answer_key(document, data)
-    write_transcript(document, data)
+    answer_key_written = write_answer_key(document, data)
+    write_transcript(document, data, answer_key_written=answer_key_written)
     normalize_document(document)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     document.save(str(output_path))

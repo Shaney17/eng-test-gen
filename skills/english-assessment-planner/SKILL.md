@@ -29,6 +29,7 @@ Before showing the teacher-facing plan, build an internal plan JSON, validate it
 - Ask only for missing instructional decisions; do not ask for facts available from the KB.
 - For tests, always produce a matrix summary before generation, but clarify whether the matrix is teacher-only metadata or printed in the DOCX.
 - For worksheets, produce a lighter content frame with exercises, resource blocks, purpose, question types, and difficulty.
+- If the teacher requests multiple units, keep the same exercise structure you would use for one unit. Do not create one separate exercise per unit. Mix vocabulary, grammar, and topics from all requested units inside each planned exercise.
 
 ## Planning Flow
 
@@ -38,6 +39,7 @@ Before showing the teacher-facing plan, build an internal plan JSON, validate it
    - grade, unit(s), lesson focus if needed, skills covered.
 3. Query the KB and summarize usable source material:
    - unit title/topic, relevant vocab, grammar, reading/listening topic hints if available.
+   - for multiple units, merge the usable source material into one combined pool grouped by content type, not into one worksheet section per unit.
 4. Propose a structure:
    - section/exercise names, teacher-friendly exercise descriptions, count, difficulty, optional points, and layout notes.
 5. Confirm constraints:
@@ -201,6 +203,7 @@ When planning, specify these constraints in natural language where relevant:
 - For 15-minute tests, prefer compact sections and objective questions.
 - For longer tests, include skill balance when requested: vocabulary/grammar plus reading and/or listening/writing.
 - If listening is included, require transcript in the producer output and mark audio as optional until teacher confirms.
+- Listening transcripts belong in the answer key/transcript section only, not in the student question area.
 - For exam papers, use continuous `Question 1...N` numbering unless the teacher explicitly asks otherwise.
 - For worksheets, reset numbering inside each exercise unless the teacher asks for continuous numbering.
 - For exam papers, default to not printing the matrix in the student DOCX; keep it in JSON for teacher review.

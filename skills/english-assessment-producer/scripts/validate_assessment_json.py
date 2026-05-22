@@ -106,6 +106,8 @@ LEADING_QUESTION_LABEL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 UNDERLINE_PATTERN = re.compile(r"__([^_\s](?:.*?[^_\s])?)__")
+SPEAKER_LABEL_PATTERN = re.compile(r"(?<!\w)([A-ZÀ-Ỹ][A-Za-zÀ-ỹ' -]{0,24}):")
+UNIT_HEADING_PATTERN = re.compile(r"^\s*unit\s+\d+\b", re.IGNORECASE)
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -193,6 +195,17 @@ def iter_questions(data: dict[str, Any]):
         yield from iter_section_questions(data)
 
 
+def iter_question_groups_with_neighbors(data: dict[str, Any]):
+    blocks = data.get("blocks")
+    if not isinstance(blocks, list):
+        return
+    for index, block in enumerate(blocks):
+        if isinstance(block, dict) and block.get("type") == "question_group":
+            previous_block = blocks[index - 1] if index > 0 and isinstance(blocks[index - 1], dict) else None
+            next_block = blocks[index + 1] if index + 1 < len(blocks) and isinstance(blocks[index + 1], dict) else None
+            yield index + 1, block, previous_block, next_block
+
+
 def question_id_for(item: dict[str, Any]) -> str:
     question = item["question"]
     return str(question.get("id") or "").strip()
@@ -251,6 +264,7 @@ def validate_blocks(data: dict[str, Any], errors: list[str]) -> None:
         return
 
     previous_block_type = ""
+    next_block_type = ""
     for index, block in enumerate(blocks, start=1):
         if not isinstance(block, dict):
             errors.append(f"blocks[{index}] must be an object.")
@@ -259,6 +273,9 @@ def validate_blocks(data: dict[str, Any], errors: list[str]) -> None:
         if block_type not in SUPPORTED_BLOCK_TYPES:
             errors.append(f"Block {block.get('id') or index} has unsupported type: {block_type}.")
             continue
+        next_block = blocks[index] if index < len(blocks) and isinstance(blocks[index], dict) else {}
+        next_block_type = str(next_block.get("type") or "")
+        next_exercise_type = str(next_block.get("exercise_type") or "")
 
         if block_type in {"vocabulary_table", "resource_table"}:
             rows = block.get("rows")
@@ -271,6 +288,10 @@ def validate_blocks(data: dict[str, Any], errors: list[str]) -> None:
             words = block.get("words") or block.get("items")
             if not isinstance(words, list) or not words:
                 errors.append(f"Word bank block {block.get('id') or index} needs words/items.")
+            if next_block_type != "question_group" or next_exercise_type != "word_bank_gap_fill":
+                errors.append(
+                    f"Word bank block {block.get('id') or index} must be placed immediately before a word_bank_gap_fill question_group."
+                )
         elif block_type == "crossword":
             grid = block.get("grid")
             if not isinstance(grid, list) or not grid or not all(isinstance(row, list) for row in grid):
@@ -291,6 +312,10 @@ def validate_blocks(data: dict[str, Any], errors: list[str]) -> None:
                 errors.append(
                     f"Question group {block.get('id') or index} uses reading_gap_fill but includes a word bank. "
                     "Use options on each blank instead."
+                )
+            if block.get("exercise_type") == "word_bank_gap_fill" and previous_block_type != "word_bank":
+                errors.append(
+                    f"Question group {block.get('id') or index} uses word_bank_gap_fill but does not have a word_bank block immediately before it."
                 )
         previous_block_type = str(block_type or "")
 
@@ -447,6 +472,85 @@ def looks_like_question(text: str) -> bool:
     )
 
 
+def is_listening_type(exercise_type: Any) -> bool:
+    return isinstance(exercise_type, str) and exercise_type.startswith("listening_")
+
+
+def speaker_labels_in_line(line: str) -> list[str]:
+    return SPEAKER_LABEL_PATTERN.findall(line or "")
+
+
+def transcript_has_wrapped_dialogue(transcript: str) -> bool:
+    for line in str(transcript or "").splitlines():
+        if len(speaker_labels_in_line(line)) > 1:
+            return True
+    return False
+
+
+def looks_like_dialogue_transcript(text: str) -> bool:
+    labels = SPEAKER_LABEL_PATTERN.findall(text or "")
+    return len(labels) >= 2
+
+
+def validate_multi_unit_structure(data: dict[str, Any], errors: list[str]) -> None:
+    metadata = data.get("metadata") if isinstance(data.get("metadata"), dict) else {}
+    units = metadata.get("units")
+    if not isinstance(units, list) or len(units) <= 1:
+        return
+
+    for index, block in enumerate(data.get("blocks") or [], start=1):
+        if not isinstance(block, dict) or block.get("type") != "question_group":
+            continue
+        visible_label = " ".join(str(block.get(key) or "") for key in ["id", "title", "instructions"])
+        if UNIT_HEADING_PATTERN.search(visible_label):
+            errors.append(
+                f"Block {block.get('id') or index} is organized as a separate unit exercise. "
+                "For multi-unit requests, keep normal exercise types and mix content from all requested units inside each exercise."
+            )
+
+
+def validate_listening_transcript(data: dict[str, Any], errors: list[str]) -> None:
+    listening_question_groups = []
+    for index, block, previous_block, _next_block in iter_question_groups_with_neighbors(data) or []:
+        if not is_listening_type(block.get("exercise_type")):
+            continue
+        listening_question_groups.append(block)
+        block_label = block.get("id") or index
+        if block.get("passage") or block.get("transcript"):
+            errors.append(
+                f"Listening question group {block_label} must not print transcript/passage in the student question area. "
+                "Put the full script only in top-level listening.transcript."
+            )
+        if previous_block and previous_block.get("type") == "passage":
+            errors.append(
+                f"Listening question group {block_label} has a passage block immediately before it. "
+                "Do not place the listening transcript in the student copy."
+            )
+        for question_index, question in enumerate(block.get("questions") or [], start=1):
+            if isinstance(question, dict) and question.get("passage"):
+                errors.append(
+                    f"Listening question {question.get('id') or str(block_label) + '.' + str(question_index)} must not contain passage/transcript text."
+                )
+
+    has_listening_questions = bool(listening_question_groups) or any(
+        is_listening_type((item["question"].get("exercise_type") or item["container"].get("exercise_type")))
+        for item in iter_questions(data)
+    )
+    listening = data.get("listening")
+    if has_listening_questions:
+        if not isinstance(listening, dict) or not listening.get("transcript"):
+            errors.append("Listening exercises require top-level listening.transcript for the answer key section.")
+        elif transcript_has_wrapped_dialogue(str(listening.get("transcript") or "")):
+            errors.append(
+                "listening.transcript dialogue must put each speaker turn on a separate line, e.g. 'Mai: ...\\nNam: ...'."
+            )
+
+    if isinstance(listening, dict) and listening.get("transcript"):
+        transcript = str(listening.get("transcript") or "")
+        if looks_like_dialogue_transcript(transcript) and transcript_has_wrapped_dialogue(transcript):
+            errors.append("Dialogue transcript is not line-broken by speaker turn.")
+
+
 def validate_matrix(data: dict[str, Any], errors: list[str], total_questions: int) -> None:
     matrix = data.get("matrix", [])
     if matrix is not None and not isinstance(matrix, list):
@@ -508,7 +612,7 @@ def validate_questions(data: dict[str, Any], errors: list[str]) -> tuple[int, fl
             not question.get("stem")
             and not question.get("prompt")
             and not question.get("passage")
-            and not (q_type in {"pronunciation_odd_one", "stress_odd_one"} and question.get("options"))
+            and not (q_type in {"pronunciation_odd_one", "stress_odd_one", "odd_one_topic"} and question.get("options"))
         ):
             errors.append(f"Question {question_id or container_id + '.' + str(question_index)} needs stem, prompt, or passage.")
 
@@ -573,6 +677,11 @@ def validate_questions(data: dict[str, Any], errors: list[str]) -> tuple[int, fl
             errors.append(
                 f"Question {question_id or container_id + '.' + str(question_index)} uses pronunciation_odd_one but options have no __underlined parts__."
             )
+        if q_type in {"pronunciation_odd_one", "stress_odd_one"} and stem_text.strip():
+            errors.append(
+                f"Question {question_id or container_id + '.' + str(question_index)} uses {q_type} but has a per-question stem/prompt. "
+                "Put one shared instruction in the question_group and render each item as number plus options only."
+            )
         if q_type == "pronunciation_odd_one" and not pronunciation_underlines_are_consistent(question.get("options")):
             errors.append(
                 f"Question {question_id or container_id + '.' + str(question_index)} uses pronunciation_odd_one but underlined letters are not the same across all options."
@@ -588,6 +697,11 @@ def validate_questions(data: dict[str, Any], errors: list[str]) -> tuple[int, fl
         if q_type in {"pronunciation_odd_one", "stress_odd_one"} and option_texts_have_embedded_labels(question.get("options")):
             errors.append(
                 f"Question {question_id or container_id + '.' + str(question_index)} option text includes A./B./C. labels. Put labels in option.label or let the renderer add them."
+            )
+        if q_type == "odd_one_topic" and stem_text.strip():
+            errors.append(
+                f"Question {question_id or container_id + '.' + str(question_index)} uses odd_one_topic but repeats a per-question stem. "
+                "Use one shared instruction in the question_group only."
             )
         if q_type in QUESTION_TYPES_WITH_OPTIONS and not question.get("options") and not question.get("items"):
             errors.append(f"Question {question_id} uses {q_type} but has no options/items.")
@@ -634,6 +748,8 @@ def validate(data: dict[str, Any]) -> list[str]:
     rendering = validate_rendering(data, errors)
     validate_blocks(data, errors)
     validate_sections(data, errors)
+    validate_multi_unit_structure(data, errors)
+    validate_listening_transcript(data, errors)
 
     total_questions, calculated_points = validate_questions(data, errors)
     validate_matrix(data, errors, total_questions)

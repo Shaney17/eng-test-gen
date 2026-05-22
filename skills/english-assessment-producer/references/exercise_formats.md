@@ -64,7 +64,7 @@ word_form_writing
 ### `pronunciation_odd_one`
 Instruction: `Choose the word whose underlined part is pronounced differently from the others.`
 
-Mark the pronounced part with `__underlined text__`; the renderer converts it to Word underline. Do not repeat the instruction inside each question stem. Each option must be one word only, not a phrase; use `dance`, not `folk dance`. The underlined letters must be identical across all options, for example all four options underline `ch`.
+Mark the pronounced part with `__underlined text__`; the renderer converts it to Word underline. Use one shared `question_group.instructions` value and do not repeat the instruction inside each question stem. Each question should omit `stem`/`prompt`; do not put the target sound (`ee`, `ch`, `/i:/`, etc.) before the options. Each option must be one word only, not a phrase; use `dance`, not `folk dance`. The underlined letters must be identical across all options, for example all four options underline `ch`.
 
 ```json
 {
@@ -127,7 +127,7 @@ Use `items` with `left` and `right`.
 Use this only when the approved blueprint explicitly asks for matching. Do not use meaning-translation matching.
 
 ### `word_bank_gap_fill`
-Use a separate `word_bank` block before the question group when the word list should be visible as a box/table.
+Use a separate `word_bank` block immediately before the question group when the word list should be visible as a box/table. Do not place it after questions or separated from the exercise by another block.
 
 ```json
 {
@@ -153,8 +153,10 @@ Use a separate `word_bank` block before the question group when the word list sh
 ```
 
 ### `odd_one_topic`
+Use one shared `question_group.instructions` value: `Choose the odd one out.` Each question should omit `stem`/`prompt` and contain only options plus answer.
+
 ```json
-{"id": "Q1", "stem": "Choose the odd one out.", "options": ["train", "bus", "plane", "kitchen"], "answer": "D"}
+{"id": "Q1", "options": ["train", "bus", "plane", "kitchen"], "answer": "D"}
 ```
 
 ### `label_picture`
@@ -346,7 +348,7 @@ Use a `notice_box` block before the question group.
 
 ## Listening
 
-Listening tasks require `listening.transcript`. MP3 generation remains optional until confirmed.
+Listening tasks require top-level `listening.transcript`. MP3 generation remains optional until confirmed. Do not put the transcript in the student question area as a passage/text block or question passage. Dialogue transcripts must have one speaker turn per line.
 
 ### `listening_mcq`
 ```json

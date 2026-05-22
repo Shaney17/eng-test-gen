@@ -134,7 +134,7 @@ Question 1. A. c<u>i</u>ty    B. b<u>i</u>cycle    C. r<u>i</u>ce    D. v<u>i</u
 
 Answer: one option letter.
 
-Internal generation note: mark underlined sounds as `__i__` inside each option. Do not put the section instruction again in each question. Each option must be one word only, not a phrase; use `dance`, not `folk dance`. The underlined letters must be identical across all options, for example all four options underline `ch`.
+Internal generation note: mark underlined sounds as `__i__` inside each option. Do not put the section instruction or target sound (`ee`, `ch`, `/i:/`, etc.) in each question. Each item should show only the number and options. Each option must be one word only, not a phrase; use `dance`, not `folk dance`. The underlined letters must be identical across all options, for example all four options underline `ch`.
 
 ### `stress_odd_one`
 Instruction: `Choose the word that has a different stress pattern from the others.`
@@ -171,6 +171,8 @@ Use this only when the teacher or blueprint explicitly asks for matching. Do not
 ### `word_bank_gap_fill`
 Instruction: `Complete the sentences with the words from the box.`
 
+Planning note: the word bank is a single resource box/table placed immediately before the questions, not after them and not repeated per item.
+
 ```text
 Words: decorate | benefit | outdoor | patient
 1. We often ________ our house before Tet.
@@ -194,6 +196,8 @@ Question 1. My sister is very ________ when she waits for the bus. (PATIENCE)
 
 ### `odd_one_topic`
 Instruction: `Choose the odd one out.`
+
+Planning note: use one shared instruction for the whole exercise. Do not plan or generate the same instruction again inside each question.
 
 ```text
 Question 1. A. train    B. bus    C. plane    D. kitchen
@@ -475,7 +479,7 @@ Speaker 2: ________
 A. playing football    B. reading books
 ```
 
-Listening formats require `listening.transcript`; MP3 is optional until confirmed.
+Listening formats require `listening.transcript`; MP3 is optional until confirmed. The transcript belongs in the answer key/transcript section only, not in the student question area. Dialogue transcripts must have one speaker turn per line.
 
 ## Writing
 

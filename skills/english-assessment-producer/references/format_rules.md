@@ -101,6 +101,7 @@ Typical order:
 - Visible borders.
 - Text centered or lightly left aligned.
 - Place immediately after the exercise heading and before questions.
+- For `word_bank_gap_fill`, the word bank must be the resource block directly before the question group.
 
 ### Questions And Options
 
@@ -112,6 +113,7 @@ Typical order:
 - For three-option worksheet MCQ, A-C is acceptable.
 - For writing/rewrite questions, use long underline answer spaces.
 - Do not repeat the section instruction inside each question. If the exercise heading says `Choose the word that has a different sound pattern from the others`, each question should show only the item number and options, not the same instruction again.
+- For phonetics and odd-one-out formats, do not put target sounds (`ee`, `ch`, `/i:/`) or repeated prompts in the question stem; show only the item number and answer options.
 - Do not put `Question 1.` or `1.` inside the question stem; numbering is rendered separately.
 - Reading True/False comprehension must be T/F/NG with a blank line/space for students to fill, not A/B/C choices.
 - Reading MCQ is split into two formats: comprehension Q&A (`reading_mcq`) and cloze blank-filling (`reading_gap_fill`). Do not use one generic reading MCQ label for both.
@@ -283,6 +285,8 @@ Do not bold long reading passages or ordinary answer choices unless matching the
 - Student worksheet may omit answer key; teacher version includes answer key at the end.
 - Student exam should omit answer key.
 - Teacher exam version can include answer key after a page break or in a separate file.
+- Listening transcripts appear only after the answer key or in a dedicated teacher transcript section, never in the student question area.
+- Dialogue transcripts must render one speaker turn per line, e.g. `Mai: ...` then `Nam: ...`.
 - Listening transcript should be included in teacher version, not necessarily in student version.
 
 ## Rendering Defaults
