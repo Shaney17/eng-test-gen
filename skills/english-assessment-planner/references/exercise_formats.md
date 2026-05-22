@@ -134,7 +134,7 @@ Question 1. A. c<u>i</u>ty    B. b<u>i</u>cycle    C. r<u>i</u>ce    D. v<u>i</u
 
 Answer: one option letter.
 
-Internal generation note: mark underlined sounds as `__i__` inside each option. Do not put the section instruction or target sound (`ee`, `ch`, `/i:/`, etc.) in each question. Each item should show only the number and options. Each option must be one word only, not a phrase; use `dance`, not `folk dance`. The underlined letters must be identical across all options, for example all four options underline `ch`.
+Internal generation note: mark underlined sounds as `__i__` inside each option. Do not put the section instruction or target sound (`ee`, `ch`, `/i:/`, etc.) in each question. Each item should show only the number and options. Each option must be one real English word from the KB vocabulary only, not a phrase; use `dance`, not `folk dance`, and never invent pseudo-words. The underlined letters must be identical across all options, for example all four options underline `ch`.
 
 ### `stress_odd_one`
 Instruction: `Choose the word that has a different stress pattern from the others.`
@@ -145,7 +145,7 @@ Question 1. A. historic    B. exciting    C. expensive    D. beautiful
 
 Answer: one option letter.
 
-Do not underline letters in stress questions. Each option must be one word only, not a phrase.
+Do not underline letters in stress questions. Each option must be one real English word from the KB vocabulary only, not a phrase or invented pseudo-word.
 
 ## Vocabulary
 

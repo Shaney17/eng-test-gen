@@ -64,7 +64,7 @@ word_form_writing
 ### `pronunciation_odd_one`
 Instruction: `Choose the word whose underlined part is pronounced differently from the others.`
 
-Mark the pronounced part with `__underlined text__`; the renderer converts it to Word underline. Use one shared `question_group.instructions` value and do not repeat the instruction inside each question stem. Each question should omit `stem`/`prompt`; do not put the target sound (`ee`, `ch`, `/i:/`, etc.) before the options. Each option must be one word only, not a phrase; use `dance`, not `folk dance`. The underlined letters must be identical across all options, for example all four options underline `ch`.
+Mark the pronounced part with `__underlined text__`; the renderer converts it to Word underline. Use one shared `question_group.instructions` value and do not repeat the instruction inside each question stem. Each question should omit `stem`/`prompt`; do not put the target sound (`ee`, `ch`, `/i:/`, etc.) before the options. Each option must be one real English word from the KB vocabulary only, not a phrase; use `dance`, not `folk dance`, and never invent pseudo-words. The underlined letters must be identical across all options, for example all four options underline `ch`.
 
 ```json
 {
@@ -84,7 +84,7 @@ Mark the pronounced part with `__underlined text__`; the renderer converts it to
 ### `stress_odd_one`
 Instruction: `Choose the word that has a different stress pattern from the others.`
 
-Do not underline any letters in stress questions. Each option must be one word only, not a phrase.
+Do not underline any letters in stress questions. Each option must be one real English word from the KB vocabulary only, not a phrase or invented pseudo-word.
 
 ```json
 {"id": "Q1", "options": ["historic", "exciting", "expensive", "beautiful"], "answer": "D"}

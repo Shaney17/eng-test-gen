@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import sqlite3
 import sys
 from pathlib import Path
 from typing import Any
@@ -111,6 +113,7 @@ LEADING_QUESTION_LABEL_PATTERN = re.compile(
 UNDERLINE_PATTERN = re.compile(r"__([^_\s](?:.*?[^_\s])?)__")
 SPEAKER_LABEL_PATTERN = re.compile(r"(?<!\w)([A-ZÀ-Ỹ][A-Za-zÀ-ỹ' -]{0,24}):")
 UNIT_HEADING_PATTERN = re.compile(r"^\s*unit\s+\d+\b", re.IGNORECASE)
+ENGLISH_WORD_PATTERN = re.compile(r"^[A-Za-z][A-Za-z'-]*$")
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -140,6 +143,54 @@ def validate_artifact_path(path: Path) -> list[str]:
             "Write assessment.json under outputs/<slug>/ instead."
         ]
     return []
+
+
+def default_kb_db_path() -> Path | None:
+    env_path = os.environ.get("ENGLISH_KB_DB_PATH")
+    candidates = []
+    if env_path:
+        candidates.append(Path(env_path))
+    candidates.extend(
+        [
+            Path.cwd() / "knowledge_base.db",
+            SKILL_ROOT.parents[1] / "knowledge_base.db" if len(SKILL_ROOT.parents) > 1 else SKILL_ROOT / "knowledge_base.db",
+        ]
+    )
+    for candidate in candidates:
+        if candidate and candidate.exists():
+            return candidate
+    return None
+
+
+def normalize_vocab_word(value: str) -> str:
+    text = UNDERLINE_PATTERN.sub(r"\1", str(value or ""))
+    text = re.sub(r"^\s*[A-D]\s*[\.:)]\s*", "", text, flags=re.IGNORECASE)
+    text = text.strip().lower()
+    text = re.sub(r"^\(to\)\s+", "", text)
+    return text
+
+
+def vocab_tokens(value: str) -> set[str]:
+    normalized = normalize_vocab_word(value)
+    tokens = {normalized} if ENGLISH_WORD_PATTERN.fullmatch(normalized) else set()
+    for token in re.findall(r"[A-Za-z][A-Za-z'-]*", normalized):
+        if len(token) > 1:
+            tokens.add(token.lower())
+    return tokens
+
+
+def load_kb_vocab_words(db_path: Path | None) -> set[str] | None:
+    if not db_path:
+        return None
+    try:
+        with sqlite3.connect(str(db_path)) as conn:
+            rows = conn.execute("select word from vocabulary").fetchall()
+    except sqlite3.Error:
+        return None
+    words: set[str] = set()
+    for (word,) in rows:
+        words.update(vocab_tokens(str(word or "")))
+    return words
 
 
 def as_number(value: Any, default: float = 0.0) -> float:
@@ -463,6 +514,57 @@ def option_texts_have_phrases(options: Any) -> bool:
     return False
 
 
+def phonetics_option_words(options: Any) -> list[str]:
+    if not isinstance(options, list):
+        return []
+    words = []
+    for idx, option in enumerate(options):
+        words.append(normalize_vocab_word(normalized_option_text(option, idx)))
+    return words
+
+
+def allowed_phonetics_words(data: dict[str, Any]) -> set[str]:
+    metadata = data.get("metadata") if isinstance(data.get("metadata"), dict) else {}
+    raw_words = metadata.get("allowed_phonetics_words") or metadata.get("allowed_external_phonetics_words") or []
+    if not isinstance(raw_words, list):
+        return set()
+    allowed: set[str] = set()
+    for word in raw_words:
+        allowed.update(vocab_tokens(str(word or "")))
+    return allowed
+
+
+def validate_phonetics_vocab(
+    data: dict[str, Any],
+    kb_vocab_words: set[str] | None,
+    errors: list[str],
+) -> None:
+    if kb_vocab_words is None:
+        return
+    allowed_words = allowed_phonetics_words(data)
+    for item in iter_questions(data):
+        container = item["container"]
+        question = item["question"]
+        q_type = question.get("exercise_type", container.get("exercise_type"))
+        if q_type not in {"pronunciation_odd_one", "stress_odd_one"}:
+            continue
+        question_id = question_id_for(item) or f"{item['container_id']}.{item['question_index']}"
+        for word in phonetics_option_words(question.get("options")):
+            if not word:
+                continue
+            if not ENGLISH_WORD_PATTERN.fullmatch(word):
+                errors.append(
+                    f"Question {question_id} phonetics option '{word}' is not a plain English word. "
+                    "Use only alphabetic English words from the KB."
+                )
+                continue
+            if word not in kb_vocab_words and word not in allowed_words:
+                errors.append(
+                    f"Question {question_id} phonetics option '{word}' is not found in knowledge_base.db. "
+                    "Use KB vocabulary, or add a teacher-approved exception in metadata.allowed_phonetics_words."
+                )
+
+
 def pronunciation_underline_values(options: Any) -> list[str]:
     if not isinstance(options, list):
         return []
@@ -763,7 +865,7 @@ def validate_numbering(data: dict[str, Any], rendering: dict[str, Any], errors: 
                 errors.append(f"Numbering in {container_id} should reset and run from 1 to N.")
 
 
-def validate(data: dict[str, Any]) -> list[str]:
+def validate(data: dict[str, Any], kb_vocab_words: set[str] | None = None) -> list[str]:
     errors: list[str] = []
     metadata = validate_metadata(data, errors)
     rendering = validate_rendering(data, errors)
@@ -771,6 +873,7 @@ def validate(data: dict[str, Any]) -> list[str]:
     validate_sections(data, errors)
     validate_multi_unit_structure(data, errors)
     validate_listening_transcript(data, errors)
+    validate_phonetics_vocab(data, kb_vocab_words, errors)
 
     total_questions, calculated_points = validate_questions(data, errors)
     validate_matrix(data, errors, total_questions)
@@ -796,13 +899,18 @@ def validate(data: dict[str, Any]) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", type=Path, help="Path to assessment.json")
+    parser.add_argument("--kb-db", type=Path, default=None, help="Optional knowledge_base.db path for strict phonetics word validation")
+    parser.add_argument("--skip-kb-vocab-check", action="store_true", help="Skip KB-backed phonetics/stress option validation")
     parser.add_argument("--json", action="store_true", help="Print machine-readable validation result")
     args = parser.parse_args()
 
     try:
         errors = validate_artifact_path(args.input)
         data = load_json(args.input)
-        errors.extend(validate(data))
+        kb_vocab_words = None
+        if not args.skip_kb_vocab_check and not is_relative_to(args.input, REFERENCES_ROOT):
+            kb_vocab_words = load_kb_vocab_words(args.kb_db or default_kb_db_path())
+        errors.extend(validate(data, kb_vocab_words=kb_vocab_words))
     except Exception as exc:  # noqa: BLE001 - CLI should report concise validation failures.
         errors = [str(exc)]
 

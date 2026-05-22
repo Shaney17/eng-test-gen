@@ -179,6 +179,7 @@ Rendering constraints:
 - `pronunciation_odd_one` and `stress_odd_one` options must be single words only, not phrases.
 - In `pronunciation_odd_one`, the underlined letters must be identical across all options, such as `scholar`, `aching`, `chemist`, `approach` all underlining `ch`.
 - `pronunciation_odd_one`, `stress_odd_one`, and `odd_one_topic` must have one shared instruction in the `question_group`; individual questions should contain only options and answer. Do not put target sounds such as `ee` or repeated prompts like `Choose the odd one out` in each question stem.
+- For `pronunciation_odd_one` and `stress_odd_one`, use real English words from the KB vocabulary only. Do not invent nonce words just to fit a sound/stress pattern. If a teacher explicitly approves an external word, add it to `metadata.allowed_phonetics_words` so validation can distinguish it from a hallucinated word.
 - Listening question groups must not include the transcript as a `passage`, `text`, question `passage`, or visible stem/prompt. Put the full transcript only in top-level `listening.transcript`; the renderer prints it after the answer key.
 - Dialogue transcripts must be line-broken by turn: `Mai: ...\nNam: ...`, not `Mai: ... Nam: ...` in one paragraph.
 - `question_making` must leave a blank answer line for students; set `lines` to at least `1` when generating JSON.
@@ -190,6 +191,7 @@ Rendering constraints:
    - If the approved `plan.json` or `blueprint.md` exists elsewhere, copy/move it into the same `outputs/<slug>/` folder before rendering.
 2. Run validation:
    - `python3 <skill_dir>/scripts/validate_assessment_json.py outputs/<slug>/assessment.json`
+   - This automatically uses `ENGLISH_KB_DB_PATH` or `knowledge_base.db` when available to reject invented phonetics/stress words.
 3. Render DOCX:
    - `python3 <skill_dir>/scripts/render_assessment_docx.py --input outputs/<slug>/assessment.json --output outputs/<slug>/<title>.docx`
 4. For listening audio after teacher confirmation:
