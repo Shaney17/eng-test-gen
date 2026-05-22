@@ -19,24 +19,30 @@ eng-test-gen/
 ## Cài đặt nhanh (Linux)
 
 ```bash
-# Tải release .tar.gz từ GitHub
-curl -fsSL https://github.com/Shaney17/eng-test-gen/archive/refs/tags/v1.0.tar.gz | tar xz
-cd eng-test-gen
-bash scripts/install_linux.sh --yes --agents all
+# Cài trực tiếp từ GitHub
+curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --agents all
 ```
 
-Hoặc sử dụng script trực tiếp từ git clone:
+Hoặc cài từ repo đã clone:
 
 ```bash
-git clone https://github.com/Shaney17/eng-test-gen.git --depth=1 --branch v1.0 /tmp/eng-test-gen
+git clone https://github.com/Shaney17/eng-test-gen.git --depth=1 /tmp/eng-test-gen
 bash /tmp/eng-test-gen/scripts/install_linux.sh --yes --agents all
 ```
 
 Script sẽ tự động:
-1. Tạo Python venv và cài `mcp`, `python-docx`, `requests`, `pyyaml`
-2. Copy app files vào `~/.local/share/english-assessment`
-3. Cài skills cho agent (Codex / Claude Code / Hermes)
-4. Cấu hình MCP server trong config của agent
+1. Tải source từ GitHub nếu chạy bằng `curl | bash`
+2. Tải `knowledge_base.db` từ GitHub nếu trong source local chưa có DB
+3. Copy app files vào `~/.local/share/english-assessment`
+4. Tạo Python venv và cài `mcp`, `python-docx`, `requests`, `pyyaml`
+5. Cài skills cho agent (Codex / Claude Code / Hermes)
+6. Cấu hình MCP server trong config của agent
+
+Mặc định DB được tải từ:
+
+```text
+https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/knowledge_base.db
+```
 
 Các tùy chọn khác:
 
@@ -46,6 +52,12 @@ curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/
 
 # Cài không cần xác nhận, thư mục tùy chỉnh
 curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --install-dir /path/to/dir --agents all
+
+# Cài từ branch/tag khác
+curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --ref main --agents all
+
+# Dùng DB URL riêng, ví dụ release asset
+curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --db-url https://github.com/Shaney17/eng-test-gen/releases/latest/download/knowledge_base.db --agents all
 
 # Bỏ qua bước cấu hình MCP (chỉ copy file)
 curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --skip-mcp-config --agents all

@@ -8,5 +8,4 @@ __pycache__
 # Local data
 ref_data
 outputs/
-knowledge_base.db
 .DS_Store
