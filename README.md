@@ -19,7 +19,17 @@ eng-test-gen/
 ## Cài đặt nhanh (Linux)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --agents all
+# Tải release .tar.gz từ GitHub
+curl -fsSL https://github.com/Shaney17/eng-test-gen/archive/refs/tags/v1.0.tar.gz | tar xz
+cd eng-test-gen
+bash scripts/install_linux.sh --yes --agents all
+```
+
+Hoặc sử dụng script trực tiếp từ git clone:
+
+```bash
+git clone https://github.com/Shaney17/eng-test-gen.git --depth=1 --branch v1.0 /tmp/eng-test-gen
+bash /tmp/eng-test-gen/scripts/install_linux.sh --yes --agents all
 ```
 
 Script sẽ tự động:
