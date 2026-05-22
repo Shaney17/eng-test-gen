@@ -20,7 +20,7 @@ Options:
   --agents LIST            Comma-separated agents: codex,claude,hermes,all
   --ref REF                Git ref to download when running from curl. Default: main
   --db-url URL             Download knowledge_base.db from this URL.
-  --yes                    Non-interactive mode. Uses --agents or defaults to all.
+  --yes                    Non-interactive mode. Requires --agents.
   --skip-mcp-config        Copy app/skills but do not update agent MCP config.
   -h, --help               Show help.
 
@@ -28,7 +28,7 @@ Examples:
   scripts/install_linux.sh
   scripts/install_linux.sh --agents codex,claude
   scripts/install_linux.sh --yes --agents all
-  curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash -s -- --yes --agents all
+  curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash
 
 MCP config files:
   Codex:       ~/.codex/config.toml
@@ -215,9 +215,9 @@ prompt_agents() {
     return
   fi
   if [[ "${ASSUME_YES}" -eq 1 ]]; then
-    normalize_agents "all"
-    return
+    die "--yes requires --agents. Example: --yes --agents codex"
   fi
+  [[ -r /dev/tty ]] || die "No interactive terminal available. Re-run with --agents codex, claude, hermes, or all."
   cat <<'EOF'
 Choose AI agents to install skills for:
   1) Codex        (~/.codex/skills)
@@ -225,8 +225,14 @@ Choose AI agents to install skills for:
   3) Hermes Agent (~/.hermes/skills)
   4) All
 EOF
-  read -r -p "Enter choices, e.g. 1,2 or all [all]: " choice
-  choice="${choice:-all}"
+  local choice
+  while true; do
+    printf 'Enter choices, e.g. 1,2 or all: ' > /dev/tty
+    IFS= read -r choice < /dev/tty || die "Could not read agent selection"
+    choice="${choice// /}"
+    [[ -n "$choice" ]] && break
+    printf '[install] Please choose at least one agent.\n' > /dev/tty
+  done
   choice="${choice// /}"
   choice="$(lowercase "$choice")"
   case "$choice" in
