@@ -307,9 +307,6 @@ PY
   if dpkg-query -W -f='${Status}' "$versioned_pkg" 2>/dev/null | grep -q "install ok installed"; then
     return
   fi
-  if dpkg-query -W -f='${Status}' python3-venv 2>/dev/null | grep -q "install ok installed"; then
-    return
-  fi
 
   install_python_venv_package || die "python3 venv support is missing. Install it with: sudo apt-get update && sudo apt-get install -y ${versioned_pkg}"
 }
@@ -323,12 +320,17 @@ ensure_python_venv() {
   fi
   rm -rf "$probe_dir"
 
-  if grep -qi "ensurepip is not available" /tmp/english-assessment-venv-check.log 2>/dev/null; then
+  if grep -Eqi "ensurepip|python3([.][0-9]+)?-venv" /tmp/english-assessment-venv-check.log 2>/dev/null; then
     install_python_venv_package || {
       cat /tmp/english-assessment-venv-check.log >&2
       die "python3 venv support is missing. Install it with: sudo apt-get update && sudo apt-get install -y python3-venv"
     }
-    return
+    probe_dir="$(mktemp -d)"
+    if python3 -m venv "${probe_dir}/venv" >/tmp/english-assessment-venv-check.log 2>&1; then
+      rm -rf "$probe_dir"
+      return
+    fi
+    rm -rf "$probe_dir"
   fi
 
   cat /tmp/english-assessment-venv-check.log >&2
