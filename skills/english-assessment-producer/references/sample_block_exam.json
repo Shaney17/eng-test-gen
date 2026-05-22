@@ -1,0 +1,231 @@
+{
+  "metadata": {
+    "title": "English Final Test",
+    "document_type": "end_term_test",
+    "document_profile": "exam",
+    "grade": 8,
+    "duration_minutes": 60,
+    "total_points": 2.5,
+    "student_fields": ["Họ và tên", "Số báo danh"],
+    "exam_code": "000",
+    "paper_note": "(Đề thi gồm 04 trang)"
+  },
+  "rendering": {
+    "question_numbering": "global",
+    "print_matrix": false,
+    "include_answer_key": true,
+    "include_transcript": true,
+    "option_layout": "auto",
+    "page_setup": {
+      "paper": "A4",
+      "margins_mm": {
+        "top": 12,
+        "bottom": 14,
+        "left": 20,
+        "right": 12
+      }
+    },
+    "footer": {
+      "enabled": true,
+      "page_numbers": true
+    }
+  },
+  "header": {
+    "left": ["PHÒNG GD&ĐT ...", "TRƯỜNG THCS ...", "--------------------"],
+    "right": ["KIỂM TRA CUỐI HỌC KỲ II", "NĂM HỌC 2025 - 2026", "MÔN: TIẾNG ANH 8", "Thời gian làm bài: 60 phút"]
+  },
+  "matrix": [
+    {
+      "block_id": "LISTENING",
+      "title": "Listening",
+      "knowledge_type": "listening",
+      "exercise_type": "listening_mcq",
+      "difficulty": 2,
+      "count": 2,
+      "points_each": 0.25
+    },
+    {
+      "block_id": "LANGUAGE",
+      "title": "Language",
+      "knowledge_type": "grammar",
+      "exercise_type": "grammar_mcq",
+      "difficulty": 2,
+      "count": 2,
+      "points_each": 0.25
+    },
+    {
+      "block_id": "NOTICE",
+      "title": "Notice",
+      "knowledge_type": "reading",
+      "exercise_type": "notice_reading",
+      "difficulty": 2,
+      "count": 2,
+      "points_each": 0.25
+    },
+    {
+      "block_id": "READING",
+      "title": "Reading passage",
+      "knowledge_type": "reading",
+      "exercise_type": "reading_mcq",
+      "difficulty": 2,
+      "count": 2,
+      "points_each": 0.25
+    },
+    {
+      "block_id": "WRITING",
+      "title": "Writing",
+      "knowledge_type": "writing",
+      "exercise_type": "guided_sentence_writing",
+      "difficulty": 3,
+      "count": 2,
+      "points_each": 0.25
+    }
+  ],
+  "blocks": [
+    {
+      "type": "question_group",
+      "id": "LISTENING",
+      "instructions": "You will hear Lan talking to her friend Nam. For each question, choose the correct answer. You will listen TWICE.",
+      "knowledge_type": "listening",
+      "exercise_type": "listening_mcq",
+      "difficulty": 2,
+      "points_each": 0.25,
+      "option_layout": "inline",
+      "questions": [
+        {
+          "id": "Q1",
+          "stem": "Where did Lan visit last weekend?",
+          "options": ["Ninh Thuan", "Sa Pa", "Lao Cai", "Ha Noi"],
+          "answer": "A"
+        },
+        {
+          "id": "Q2",
+          "stem": "What are the Cham people most famous for?",
+          "options": ["cooking skills", "weaving skills", "farming practices", "boat-building skills"],
+          "answer": "B"
+        }
+      ]
+    },
+    {
+      "type": "question_group",
+      "id": "LANGUAGE",
+      "instructions": "Mark the letter A, B, C or D to indicate the correct answer.",
+      "knowledge_type": "grammar",
+      "exercise_type": "grammar_mcq",
+      "difficulty": 2,
+      "points_each": 0.25,
+      "questions": [
+        {
+          "id": "Q3",
+          "stem": "Please take a photo of me ________ I am standing in front of the tower.",
+          "options": ["while", "until", "as soon as", "after"],
+          "answer": "A"
+        },
+        {
+          "id": "Q4",
+          "stem": "The hiking trail goes ________ the mountain.",
+          "options": ["along", "over", "into", "from"],
+          "answer": "B"
+        }
+      ]
+    },
+    {
+      "type": "notice_box",
+      "id": "NOTICEBOX",
+      "text": "ALL VISITORS TO THE ETHNIC VILLAGE MUST REGISTER\nAT THE ENTRANCE AND FOLLOW LOCAL CUSTOMS AT ALL TIMES.",
+      "bold": true
+    },
+    {
+      "type": "question_group",
+      "id": "NOTICE",
+      "instructions": "Read the notice and choose the correct answer.",
+      "knowledge_type": "reading",
+      "exercise_type": "notice_reading",
+      "difficulty": 2,
+      "points_each": 0.25,
+      "option_layout": "stacked",
+      "questions": [
+        {
+          "id": "Q5",
+          "stem": "What does the notice say?",
+          "options": [
+            "Visitors can enter without registration.",
+            "Visitors must sign in and respect local customs.",
+            "Only local people can register.",
+            "Following customs is optional."
+          ],
+          "answer": "B"
+        },
+        {
+          "id": "Q6",
+          "stem": "Where must visitors register?",
+          "options": ["At the entrance", "At the market", "At school", "At home"],
+          "answer": "A"
+        }
+      ]
+    },
+    {
+      "type": "question_group",
+      "id": "READING",
+      "instructions": "Read the following passage and choose the correct answer.",
+      "passage": "Millions of people all over the world like travelling. They travel to see other countries and learn about other cultures.",
+      "knowledge_type": "reading",
+      "exercise_type": "reading_mcq",
+      "difficulty": 2,
+      "points_each": 0.25,
+      "questions": [
+        {
+          "id": "Q7",
+          "stem": "What is the main idea of the passage?",
+          "options": ["People travel for different reasons.", "People never travel.", "Cities are boring.", "Travelling is impossible."],
+          "answer": "A"
+        },
+        {
+          "id": "Q8",
+          "stem": "Why do people travel?",
+          "options": ["To learn about cultures", "To stay home", "To avoid friends", "To sleep"],
+          "answer": "A"
+        }
+      ]
+    },
+    {
+      "type": "question_group",
+      "id": "WRITING",
+      "instructions": "Write complete sentences from the words and phrases.",
+      "knowledge_type": "writing",
+      "exercise_type": "guided_sentence_writing",
+      "difficulty": 3,
+      "points_each": 0.25,
+      "questions": [
+        {
+          "id": "Q9",
+          "stem": "We / call / you / as soon as / arrive / hotel.",
+          "answer": "We will call you as soon as we arrive at the hotel.",
+          "lines": 1
+        },
+        {
+          "id": "Q10",
+          "stem": "The guide / say / trip / be / enjoyable.",
+          "answer": "The guide said the trip was enjoyable.",
+          "lines": 1
+        }
+      ]
+    }
+  ],
+  "answer_key": [
+    {"question_id": "Q1", "answer": "A"},
+    {"question_id": "Q2", "answer": "B"},
+    {"question_id": "Q3", "answer": "A"},
+    {"question_id": "Q4", "answer": "B"},
+    {"question_id": "Q5", "answer": "B"},
+    {"question_id": "Q6", "answer": "A"},
+    {"question_id": "Q7", "answer": "A"},
+    {"question_id": "Q8", "answer": "A"},
+    {"question_id": "Q9", "answer": "We will call you as soon as we arrive at the hotel."},
+    {"question_id": "Q10", "answer": "The guide said the trip was enjoyable."}
+  ],
+  "listening": {
+    "transcript": "Lan: Last weekend I visited a Cham ethnic village.\nNam: What did you learn there?\nLan: I learned that Cham people are famous for weaving skills.",
+    "audio_manifest": null
+  }
+}

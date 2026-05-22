@@ -1,0 +1,80 @@
+{
+  "type": "object",
+  "required": [
+    "document_type",
+    "grade",
+    "units",
+    "title_header",
+    "duration",
+    "output_language",
+    "numbering",
+    "matrix_printed_in_docx",
+    "output_versions",
+    "sections",
+    "content_sources",
+    "special_requirements"
+  ],
+  "properties": {
+    "document_type": {
+      "type": "string",
+      "enum": ["worksheet", "revision_sheet", "quiz_15", "midterm_test", "end_of_unit_test", "final_exam", "custom_test"]
+    },
+    "grade": {"type": "integer", "enum": [6, 7, 8, 9]},
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["unit_number"],
+        "properties": {
+          "unit_number": {"type": "integer"},
+          "title": {"type": "string"}
+        }
+      }
+    },
+    "title_header": {"type": "string"},
+    "duration": {"type": "string"},
+    "total_points": {"type": ["number", "integer", "string", "null"]},
+    "output_language": {"type": "string"},
+    "numbering": {"type": "string", "enum": ["per_section", "global"]},
+    "matrix_printed_in_docx": {"type": "boolean"},
+    "output_versions": {
+      "type": "array",
+      "items": {"type": "string", "enum": ["student", "teacher_answer_key", "teacher_full"]}
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["section", "focus", "exercise_type", "difficulty", "count", "layout_notes"],
+        "properties": {
+          "section": {"type": "string"},
+          "focus": {"type": "string"},
+          "exercise_type": {"type": "string"},
+          "teacher_facing_format": {"type": "string"},
+          "difficulty": {"type": "integer", "enum": [1, 2, 3]},
+          "count": {"type": "integer"},
+          "points": {"type": ["number", "integer", "string", "null"]},
+          "layout_notes": {"type": "string"},
+          "grammar_focus": {"type": "string"}
+        }
+      }
+    },
+    "content_sources": {
+      "type": "object",
+      "properties": {
+        "vocabulary": {"type": ["string", "array"]},
+        "grammar": {"type": ["string", "array"]},
+        "reading_listening_topic": {"type": ["string", "array"]}
+      }
+    },
+    "special_requirements": {
+      "type": "object",
+      "properties": {
+        "listening": {"type": "boolean"},
+        "transcript": {"type": "boolean"},
+        "audio": {"type": "boolean"},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "document_type": "worksheet",
+  "grade": 7,
+  "units": [{"unit_number": 9, "title": "Festivals around the world"}],
+  "title_header": "Grade 7 - Unit 9 Worksheet",
+  "duration": "35-45 phút",
+  "total_points": null,
+  "output_language": "Tiếng Anh, chỉ dẫn ngắn gọn",
+  "numbering": "per_section",
+  "matrix_printed_in_docx": false,
+  "output_versions": ["student", "teacher_answer_key"],
+  "sections": [
+    {
+      "section": "A",
+      "focus": "Vocabulary",
+      "exercise_type": "vocab_mcq",
+      "teacher_facing_format": "MCQ từ vựng trong ngữ cảnh tiếng Anh",
+      "difficulty": 1,
+      "count": 6,
+      "points": 1.5,
+      "layout_notes": "Đáp án A/B/C/D dàn đều trên một dòng"
+    },
+    {
+      "section": "B",
+      "focus": "Reading",
+      "exercise_type": "reading_gap_fill",
+      "teacher_facing_format": "Đọc đoạn văn và chọn từ điền vào chỗ trống",
+      "difficulty": 2,
+      "count": 5,
+      "points": 2,
+      "layout_notes": "Mỗi chỗ trống có A/B/C/D trên cùng dòng với số câu"
+    }
+  ],
+  "content_sources": {
+    "vocabulary": ["festival", "parade", "fireworks"],
+    "grammar": ["Yes/No questions"],
+    "reading_listening_topic": "Festivals around the world"
+  },
+  "special_requirements": {
+    "listening": false,
+    "transcript": false,
+    "audio": false,
+    "notes": "Có đáp án cuối tài liệu cho giáo viên"
+  }
+}

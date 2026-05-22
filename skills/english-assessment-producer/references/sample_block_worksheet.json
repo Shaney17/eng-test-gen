@@ -1,0 +1,198 @@
+{
+  "metadata": {
+    "title": "Topic 9: Future Transport",
+    "document_type": "worksheet",
+    "document_profile": "worksheet",
+    "grade": 7,
+    "units": [
+      {
+        "unit_number": 9,
+        "title": "FUTURE TRANSPORT"
+      }
+    ],
+    "duration_minutes": 45,
+    "total_points": 4,
+    "student_fields": ["Name", "Class"]
+  },
+  "rendering": {
+    "question_numbering": "per_section",
+    "print_matrix": false,
+    "include_answer_key": true,
+    "include_transcript": false,
+    "option_layout": "inline"
+  },
+  "matrix": [
+    {
+      "block_id": "EX1",
+      "title": "Missing letters",
+      "knowledge_type": "vocabulary",
+      "exercise_type": "missing_letters",
+      "difficulty": 1,
+      "count": 2,
+      "points_each": 0.5
+    },
+    {
+      "block_id": "EX2",
+      "title": "Multiple choice",
+      "knowledge_type": "vocabulary",
+      "exercise_type": "vocab_mcq",
+      "difficulty": 1,
+      "count": 2,
+      "points_each": 0.5
+    },
+    {
+      "block_id": "EX3",
+      "title": "Word bank",
+      "knowledge_type": "reading",
+      "exercise_type": "missing_letters",
+      "difficulty": 2,
+      "count": 2,
+      "points_each": 0.5
+    },
+    {
+      "block_id": "EX4",
+      "title": "Rewrite",
+      "knowledge_type": "grammar",
+      "exercise_type": "sentence_rewrite",
+      "difficulty": 2,
+      "count": 2,
+      "points_each": 0.5
+    }
+  ],
+  "blocks": [
+    {
+      "type": "vocabulary_table",
+      "id": "VOCAB",
+      "title": "I. VOCABULARY",
+      "columns": ["ENGLISH", "TYPE", "PRONUNCIATION", "VIETNAMESE"],
+      "rows": [
+        ["bullet train", "n", "/ˈbʊlɪt treɪn/", "tàu cao tốc"],
+        ["flying car", "n", "/ˈflaɪɪŋ kɑː(r)/", "ô tô bay"],
+        ["jetpack", "n", "/ˈdʒetpæk/", "thiết bị bay"]
+      ]
+    },
+    {
+      "type": "heading",
+      "id": "PRACTICE",
+      "text": "PRACTICE:",
+      "level": 1
+    },
+    {
+      "type": "crossword",
+      "id": "CW1",
+      "title": "Exercise 1: Complete the sentences with missing letters and do the crossword.",
+      "grid": [
+        ["", "", "1", "T", "R", "A", "I", "N"],
+        ["2", "", "", "", "", "", "", ""],
+        ["", "", "", "", "", "", "", ""]
+      ]
+    },
+    {
+      "type": "question_group",
+      "id": "EX1",
+      "instructions": "Complete the sentences with missing letters.",
+      "knowledge_type": "vocabulary",
+      "exercise_type": "missing_letters",
+      "difficulty": 1,
+      "points_each": 0.5,
+      "questions": [
+        {
+          "id": "EX1-1",
+          "stem": "I will catch the t_ _ _ _ from Hanoi to Saigon at 10 p.m.",
+          "answer": "train"
+        },
+        {
+          "id": "EX1-2",
+          "stem": "You should go earlier to avoid t_ _ _ _ _ _ jam.",
+          "answer": "traffic"
+        }
+      ]
+    },
+    {
+      "type": "question_group",
+      "id": "EX2",
+      "title": "Exercise 2: Choose the best options to complete the sentences.",
+      "knowledge_type": "vocabulary",
+      "exercise_type": "vocab_mcq",
+      "difficulty": 1,
+      "points_each": 0.5,
+      "option_layout": "inline",
+      "questions": [
+        {
+          "id": "EX2-1",
+          "stem": "A type of high-speed train which originated in Japan is a ________.",
+          "options": ["hover scooter", "bullet train", "skycycling"],
+          "answer": "B"
+        },
+        {
+          "id": "EX2-2",
+          "stem": "We just wear a ________ on our back and we can fly.",
+          "options": ["skytrain", "teleporter", "jetpack"],
+          "answer": "C"
+        }
+      ]
+    },
+    {
+      "type": "word_bank",
+      "id": "BANK1",
+      "title": "Exercise 3: Complete with available words.",
+      "words": ["plane", "spacecraft", "air balloon", "bike", "coach", "motorbike", "ambulance", "submarine"],
+      "columns_count": 4
+    },
+    {
+      "type": "question_group",
+      "id": "EX3",
+      "knowledge_type": "reading",
+      "exercise_type": "word_bank_gap_fill",
+      "difficulty": 2,
+      "points_each": 0.5,
+      "questions": [
+        {
+          "id": "EX3-1",
+          "stem": "I can stay underwater for a long time. I am a ________.",
+          "answer": "submarine"
+        },
+        {
+          "id": "EX3-2",
+          "stem": "I live in the sky and bring many people to faraway places. I am a ________.",
+          "answer": "plane"
+        }
+      ]
+    },
+    {
+      "type": "question_group",
+      "id": "EX4",
+      "title": "III. GRAMMAR - Finish the second sentence.",
+      "knowledge_type": "grammar",
+      "exercise_type": "sentence_rewrite",
+      "difficulty": 2,
+      "points_each": 0.5,
+      "questions": [
+        {
+          "id": "EX4-1",
+          "stem": "Taking a train is different from taking a plane.",
+          "prompt": "Taking a train is not ________________________________.",
+          "answer": "Taking a train is not the same as taking a plane.",
+          "lines": 1
+        },
+        {
+          "id": "EX4-2",
+          "stem": "Physics is not as easy as mathematics.",
+          "prompt": "Mathematics __________________________________________.",
+          "answer": "Mathematics is easier than physics.",
+          "lines": 1
+        }
+      ]
+    }
+  ],
+  "answer_key": [
+    {"question_id": "EX1-1", "answer": "train"},
+    {"question_id": "EX1-2", "answer": "traffic"},
+    {"question_id": "EX2-1", "answer": "B"},
+    {"question_id": "EX2-2", "answer": "C"},
+    {"question_id": "EX3-1", "answer": "submarine"},
+    {"question_id": "EX3-2", "answer": "plane"},
+    {"question_id": "EX4-1", "answer": "Taking a train is not the same as taking a plane."},
+    {"question_id": "EX4-2", "answer": "Mathematics is easier than physics."}
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "items": [
+    {
+      "id": "listening-1",
+      "mode": "single",
+      "text": "Hello. My name is Mai. My hobby is making models.",
+      "voice_id": "VOICE_ID",
+      "model_id": "eleven_multilingual_v2",
+      "output_file": "listening-1.mp3"
+    },
+    {
+      "id": "dialogue-1",
+      "mode": "dialogue",
+      "model_id": "eleven_v3",
+      "output_file": "dialogue-1.mp3",
+      "turns": [
+        {
+          "speaker": "Mai",
+          "text": "What is your hobby?",
+          "voice_id": "VOICE_ID_1"
+        },
+        {
+          "speaker": "Nam",
+          "text": "I like making models.",
+          "voice_id": "VOICE_ID_2"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "metadata": {
+    "title": "Grade 7 Unit 1 Worksheet",
+    "document_type": "worksheet",
+    "grade": 7,
+    "units": [
+      {
+        "unit_number": 1,
+        "title": "HOBBIES"
+      }
+    ],
+    "duration_minutes": 15,
+    "total_points": 1,
+    "student_fields": ["Name", "Class"]
+  },
+  "matrix": [
+    {
+      "section_id": "A",
+      "title": "Vocabulary",
+      "knowledge_type": "vocabulary",
+      "exercise_type": "vocab_mcq",
+      "difficulty": 1,
+      "count": 2,
+      "points_each": 0.5
+    }
+  ],
+  "sections": [
+    {
+      "id": "A",
+      "title": "Vocabulary",
+      "instructions": "Choose the best answer.",
+      "knowledge_type": "vocabulary",
+      "exercise_type": "vocab_mcq",
+      "difficulty": 1,
+      "points_each": 0.5,
+      "questions": [
+        {
+          "id": "A1",
+          "stem": "My brother has an ________ hobby: he collects old bus tickets.",
+          "options": ["unusual", "outdoor", "valuable", "patient"],
+          "answer": "A",
+          "explanation": "unusual fits the context of a hobby that is not common."
+        },
+        {
+          "id": "A2",
+          "stem": "Students should take ________ for keeping their classroom clean.",
+          "options": ["coin", "responsibility", "glue", "benefit"],
+          "answer": "B",
+          "explanation": "take responsibility for something means being in charge of doing it well."
+        }
+      ]
+    }
+  ],
+  "answer_key": [
+    {
+      "question_id": "A1",
+      "answer": "A"
+    },
+    {
+      "question_id": "A2",
+      "answer": "B"
+    }
+  ],
+  "listening": {
+    "transcript": "Mai: What is your hobby?\nNam: I like making models.",
+    "audio_manifest": {
+      "items": [
+        {
+          "id": "dialogue-1",
+          "mode": "dialogue",
+          "model_id": "eleven_v3",
+          "output_file": "dialogue-1.mp3",
+          "turns": [
+            {
+              "speaker": "Mai",
+              "text": "What is your hobby?",
+              "voice_id": "VOICE_ID_1"
+            },
+            {
+              "speaker": "Nam",
+              "text": "I like making models.",
+              "voice_id": "VOICE_ID_2"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

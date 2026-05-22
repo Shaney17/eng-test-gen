@@ -1,0 +1,12 @@
+# Python
+__pycache__
+
+# AI agents
+.agents
+.claude
+
+# Local data
+ref_data
+outputs/
+knowledge_base.db
+.DS_Store
