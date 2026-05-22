@@ -28,7 +28,7 @@ Examples:
   scripts/install_linux.sh
   scripts/install_linux.sh --agents codex,claude
   scripts/install_linux.sh --yes --agents all
-  curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --agents all
+  curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash -s -- --yes --agents all
 
 MCP config files:
   Codex:       ~/.codex/config.toml
@@ -292,6 +292,28 @@ PY
   run_apt_get install -y "$versioned_pkg" || run_apt_get install -y python3-venv
 }
 
+ensure_debian_python_venv_package() {
+  [[ -f /etc/debian_version ]] || return
+  command -v apt-get >/dev/null 2>&1 || return
+  command -v dpkg-query >/dev/null 2>&1 || return
+
+  local versioned_pkg
+  versioned_pkg="$(python3 - <<'PY'
+import sys
+print(f"python{sys.version_info.major}.{sys.version_info.minor}-venv")
+PY
+)"
+
+  if dpkg-query -W -f='${Status}' "$versioned_pkg" 2>/dev/null | grep -q "install ok installed"; then
+    return
+  fi
+  if dpkg-query -W -f='${Status}' python3-venv 2>/dev/null | grep -q "install ok installed"; then
+    return
+  fi
+
+  install_python_venv_package || die "python3 venv support is missing. Install it with: sudo apt-get update && sudo apt-get install -y ${versioned_pkg}"
+}
+
 ensure_python_venv() {
   local probe_dir
   probe_dir="$(mktemp -d)"
@@ -315,6 +337,7 @@ ensure_python_venv() {
 
 install_python_env() {
   command -v python3 >/dev/null 2>&1 || die "python3 is required"
+  ensure_debian_python_venv_package
   ensure_python_venv
   log "Creating Python virtual environment"
   rm -rf "${INSTALL_DIR}/.venv"

@@ -20,7 +20,7 @@ eng-test-gen/
 
 ```bash
 # Cài trực tiếp từ GitHub
-curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --agents all
+curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash -s -- --yes --agents all
 ```
 
 Hoặc cài từ repo đã clone:
@@ -49,19 +49,19 @@ Các tùy chọn khác:
 
 ```bash
 # Chỉ cài cho Claude Code
-curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --agents claude
+curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash -s -- --yes --agents claude
 
 # Cài không cần xác nhận, thư mục tùy chỉnh
-curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --install-dir /path/to/dir --agents all
+curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash -s -- --yes --install-dir /path/to/dir --agents all
 
 # Cài từ branch/tag khác
-curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --ref main --agents all
+curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash -s -- --yes --ref main --agents all
 
 # Dùng DB URL riêng, ví dụ release asset
-curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --db-url https://github.com/Shaney17/eng-test-gen/releases/latest/download/knowledge_base.db --agents all
+curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash -s -- --yes --db-url https://github.com/Shaney17/eng-test-gen/releases/latest/download/knowledge_base.db --agents all
 
 # Bỏ qua bước cấu hình MCP (chỉ copy file)
-curl -fsSL https://raw.githubusercontent.com/Shaney17/eng-test-gen/main/scripts/install_linux.sh | bash -s -- --yes --skip-mcp-config --agents all
+curl -fsSL https://github.com/Shaney17/eng-test-gen/raw/main/scripts/install_linux.sh | bash -s -- --yes --skip-mcp-config --agents all
 ```
 
 ## Kiến trúc hai bước
