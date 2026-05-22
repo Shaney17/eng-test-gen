@@ -34,9 +34,10 @@ Script sẽ tự động:
 1. Tải source từ GitHub nếu chạy bằng `curl | bash`
 2. Tải `knowledge_base.db` từ GitHub nếu trong source local chưa có DB
 3. Copy app files vào `~/.local/share/english-assessment`
-4. Tạo Python venv và cài `mcp`, `python-docx`, `requests`, `pyyaml`
-5. Cài skills cho agent (Codex / Claude Code / Hermes)
-6. Cấu hình MCP server trong config của agent
+4. Cài `python3-venv` trên Ubuntu/Debian nếu máy đang thiếu
+5. Tạo Python venv và cài `mcp`, `python-docx`, `requests`, `pyyaml`
+6. Cài skills cho agent (Codex / Claude Code / Hermes)
+7. Cấu hình MCP server trong config của agent
 
 Mặc định DB được tải từ:
 

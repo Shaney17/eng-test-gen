@@ -267,9 +267,57 @@ install_app_files() {
   cp "${REPO_DIR}/README_MCP.md" "${INSTALL_DIR}/README_MCP.md" 2>/dev/null || true
 }
 
+run_apt_get() {
+  if [[ "$(id -u)" -eq 0 ]]; then
+    apt-get "$@"
+  elif command -v sudo >/dev/null 2>&1; then
+    sudo apt-get "$@"
+  else
+    return 1
+  fi
+}
+
+install_python_venv_package() {
+  command -v apt-get >/dev/null 2>&1 || return 1
+
+  local versioned_pkg
+  versioned_pkg="$(python3 - <<'PY'
+import sys
+print(f"python{sys.version_info.major}.{sys.version_info.minor}-venv")
+PY
+)"
+
+  log "Installing Python venv support with apt"
+  run_apt_get update
+  run_apt_get install -y "$versioned_pkg" || run_apt_get install -y python3-venv
+}
+
+ensure_python_venv() {
+  local probe_dir
+  probe_dir="$(mktemp -d)"
+  if python3 -m venv "${probe_dir}/venv" >/tmp/english-assessment-venv-check.log 2>&1; then
+    rm -rf "$probe_dir"
+    return
+  fi
+  rm -rf "$probe_dir"
+
+  if grep -qi "ensurepip is not available" /tmp/english-assessment-venv-check.log 2>/dev/null; then
+    install_python_venv_package || {
+      cat /tmp/english-assessment-venv-check.log >&2
+      die "python3 venv support is missing. Install it with: sudo apt-get update && sudo apt-get install -y python3-venv"
+    }
+    return
+  fi
+
+  cat /tmp/english-assessment-venv-check.log >&2
+  die "python3 -m venv failed"
+}
+
 install_python_env() {
   command -v python3 >/dev/null 2>&1 || die "python3 is required"
+  ensure_python_venv
   log "Creating Python virtual environment"
+  rm -rf "${INSTALL_DIR}/.venv"
   python3 -m venv "${INSTALL_DIR}/.venv"
   "${INSTALL_DIR}/.venv/bin/python" -m pip install --upgrade pip
   "${INSTALL_DIR}/.venv/bin/python" -m pip install mcp python-docx requests pyyaml
